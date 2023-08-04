@@ -6,5 +6,8 @@ module.exports = {
   API_BASE_PATH: '/api',
   RESOURCE: {
     USERS: 'user',
+    AUTH: 'auth',
+    LOAD: 'load',
+    UNINSTALL: 'uninstall'
   },
 };

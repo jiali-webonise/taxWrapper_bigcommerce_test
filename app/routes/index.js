@@ -16,9 +16,9 @@ module.exports = function (app) {
     );
     next();
   });
-  app.use(`/${RESOURCE.AUTH}`, authRoutes);
-  app.use(`/${RESOURCE.LOAD}`, loadRoutes);
-  app.use(`/${RESOURCE.UNINSTALL}`, uninstallRoutes);
+  app.use(`${API_BASE_PATH}/${RESOURCE.AUTH}`, authRoutes);
+  app.use(`${API_BASE_PATH}/${RESOURCE.LOAD}`, loadRoutes);
+  app.use(`${API_BASE_PATH}/${RESOURCE.UNINSTALL}`, uninstallRoutes);
 
   app.use(`${API_BASE_PATH}/${RESOURCE.USERS}`, userRoutes);
 

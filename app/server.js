@@ -30,5 +30,5 @@ if (process.env.NODE_ENV === 'development') {
 // routes
 require('./routes')(app);
 
-const PORT = process.env.PORT || '8080'
+const PORT = process.env.PORT || '3000'
 app.listen(PORT, () => console.log(`Application running on port: ${PORT}`));

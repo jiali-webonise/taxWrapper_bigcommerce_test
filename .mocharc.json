@@ -1,0 +1,13 @@
+{
+  "diff": true,
+  "color": true,
+  "extension": ["test.js","js"],
+  "opts": false,
+  "package": "./package.json",
+  "reporter": "spec",
+  "slow": 75,
+  "timeout": 2000,
+  "ui": "bdd",
+  "bail": true,
+  "exclude": ["node_modules"]
+}

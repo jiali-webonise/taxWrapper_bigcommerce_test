@@ -8,6 +8,7 @@ module.exports = {
     USERS: 'user',
     AUTH: 'auth',
     LOAD: 'load',
-    UNINSTALL: 'uninstall'
+    UNINSTALL: 'uninstall',
+    ESTIMATE: 'tax/estimate'
   },
 };

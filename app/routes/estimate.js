@@ -54,7 +54,8 @@ dotenv.config();
  *         - currency_code
  *         - customer
  *         - transaction_date
- *         - documents 
+ *         - documents
+ *         - converted
  *       properties:
  *         id:
  *           type: string
@@ -71,6 +72,9 @@ dotenv.config();
  *         documents:
  *           type: object
  *           description: The documents object
+ *         converted:
+ *           type: boolean
+ *           description: This estimate is converted
  *       example:
  *         id: 3f0c857e
  *         currency_code: USD
@@ -81,6 +85,7 @@ dotenv.config();
  *         }
  *         transaction_date: 2019-08-13T03:17:37+00:00
  *         documents: {}
+ *         converted: true
  */
 
 /**
@@ -88,7 +93,7 @@ dotenv.config();
  * tags:
  *   name: Estimate
  *   description: The tax estimate API
- * /api/tax/estimate:
+ * /tax/estimate:
  *   post:
  *     summary: post tax estimate object
  *     tags: [Estimate]
@@ -113,7 +118,8 @@ dotenv.config();
 router.post('/', (req, res, next) => {
   try {
     console.log('req', req.body);
-    return res.status(200).send(JSON.stringify(req.body));
+    const result = {...req.body, converted: true}
+    return res.status(200).send(JSON.stringify(result));
   } catch (err) {
     next(err);
   }

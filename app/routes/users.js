@@ -29,16 +29,10 @@ const {use} = require('../services/error-service');
  * tags:
  *   name: User
  *   description: The get users API
- * /api/user:
+ * /user:
  *   get:
  *     summary: Get users
  *     tags: [User]
- *     requestBody:
- *       required: false
- *       content:
- *         application/json:
- *           schema:
- *             $ref: '#/components/schemas/User'
  *     responses:
  *       200:
  *         description: The users.
@@ -50,16 +44,18 @@ const {use} = require('../services/error-service');
  *         description: Failed to fetch users
  *   name: User
  *   description: The get user by ID API
- * /api/user/{userId}:
+ * 
+ * /user/{userId}:
  *   get:
  *     summary: Get user by ID
+ *     parameters:
+ *       - in: path
+ *         name: userId
+ *         type: integer
+ *         required: true
+ *         description: Numeric ID of the user to get.
+ * 
  *     tags: [User]
- *     requestBody:
- *       required: false
- *       content:
- *         application/json:
- *           schema:
- *             $ref: '#/components/schemas/User'
  *     responses:
  *       200:
  *         description: The users.

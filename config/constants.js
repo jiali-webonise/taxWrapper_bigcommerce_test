@@ -9,6 +9,6 @@ module.exports = {
     AUTH: 'auth',
     LOAD: 'load',
     UNINSTALL: 'uninstall',
-    ESTIMATE: 'estimate'
+    ESTIMATE: 'tax/estimate'
   },
 };

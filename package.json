@@ -46,7 +46,9 @@
     "chai": "^4.3.7",
     "mocha": "^10.2.0",
     "nodemon": "^3.0.1",
-    "pre-commit": "^1.2.2"
+    "pre-commit": "^1.2.2",
+    "swagger-jsdoc": "^6.2.8",
+    "swagger-ui-express": "^5.0.0"
   },
   "pre-commit": [
     "test"

@@ -6,6 +6,10 @@ const loadRoutes = require('./load.js');
 const uninstallRoutes = require('./uninstall.js');
 const estimateRoutes = require('./estimate.js');
 
+const swaggerJsdoc = require("swagger-jsdoc");
+const swaggerUi = require("swagger-ui-express");
+const options = require('../../config/swagger-config.js');
+
 module.exports = function (app) {
   app.use(function (req, res, next) {
     Object.keys(req.body).forEach(function (key) {
@@ -24,6 +28,10 @@ module.exports = function (app) {
   app.use(`${API_BASE_PATH}/${RESOURCE.ESTIMATE}`, estimateRoutes);
 
   app.use(`${API_BASE_PATH}/${RESOURCE.USERS}`, userRoutes);
+
+  // Swagger Doc URL
+  const specs = swaggerJsdoc(options);
+  app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(specs, {explorer: true}));
 
   app.use((req, res) => {
     winston.error(`${404} - ${req.originalUrl} - ${req.method} - ${req.ip}`);

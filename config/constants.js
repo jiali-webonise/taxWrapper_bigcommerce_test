@@ -1,4 +1,5 @@
 const path = require('path');
+
 const rootDirectory = path.join(__dirname, '../');
 
 module.exports = {
@@ -9,6 +10,6 @@ module.exports = {
     AUTH: 'auth',
     LOAD: 'load',
     UNINSTALL: 'uninstall',
-    ESTIMATE: 'tax/estimate'
+    ESTIMATE: 'tax/estimate',
   },
 };

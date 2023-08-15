@@ -1,7 +1,8 @@
 const express = require('express');
+
 const router = express.Router();
 const UserController = require('../controllers/user-controller');
-const {use} = require('../services/error-service');
+const { use } = require('../services/error-service');
 
 /**
  * @swagger
@@ -44,7 +45,7 @@ const {use} = require('../services/error-service');
  *         description: Failed to fetch users
  *   name: User
  *   description: The get user by ID API
- * 
+ *
  * /user/{userId}:
  *   get:
  *     summary: Get user by ID
@@ -54,7 +55,7 @@ const {use} = require('../services/error-service');
  *         type: integer
  *         required: true
  *         description: Numeric ID of the user to get.
- * 
+ *
  *     tags: [User]
  *     responses:
  *       200:

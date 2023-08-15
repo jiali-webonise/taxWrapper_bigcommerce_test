@@ -1,6 +1,9 @@
-const {NoResultsError} = require("../services/error-service");
+const { NoResultsError } = require('../services/error-service');
 
-const users = [{id: 1, username: 'John'}, {id: 2, username: 'Kim'}]
+const users = [
+  { id: 1, username: 'John' },
+  { id: 2, username: 'Kim' },
+];
 /**
  * Get users from CTM PostgreSQL database
  * You have the option to search by individual fields or all string searchable fields.
@@ -25,7 +28,7 @@ const getUser = async (req, res) => {
   if (!id) {
     throw new NoResultsError();
   }
-  const userResponse = users.find(el => el.id === id);
+  const userResponse = users.find((el) => el.id === id);
   return res.status(200).send(userResponse);
 };
 

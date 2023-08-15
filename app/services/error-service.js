@@ -4,9 +4,8 @@
  * @return {(function(*, *, *): void)|*}
  * @param fn
  */
-const use = fn => (req, res, next) => {
-  Promise.resolve(fn(req, res, next))
-    .catch(next);
+const use = (fn) => (req, res, next) => {
+  Promise.resolve(fn(req, res, next)).catch(next);
 };
 
 /**
@@ -17,15 +16,15 @@ const use = fn => (req, res, next) => {
  */
 class NoResultsError extends Error {
   constructor(args) {
-    const {code, name, message} = args || {};
+    const { code, name, message } = args || {};
     super();
-    this.status = code ? code : 404;
-    this.name = name ? name : 'No Results Found';
-    this.message = message ? message : 'No Results Found';
+    this.status = code || 404;
+    this.name = name || 'No Results Found';
+    this.message = message || 'No Results Found';
   }
 }
 
 module.exports = {
   use,
   NoResultsError,
-}
+};

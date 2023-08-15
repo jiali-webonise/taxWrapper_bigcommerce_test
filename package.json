@@ -11,7 +11,11 @@
   "scripts": {
     "start": "nodemon app/server.js",
     "test-watch": "mocha --watch",
-    "test": "mocha"
+    "test": "mocha",
+    "format:check": "prettier --check .",
+    "format:write": "prettier --write .",
+    "lint:check": "eslint .",
+    "lint:fix": "eslint --fix . --ext .js"
   },
   "lint-staged": {
     "**/*.{js}": [
@@ -44,9 +48,14 @@
   },
   "devDependencies": {
     "chai": "^4.3.7",
+    "eslint": "^8.47.0",
+    "eslint-config-prettier": "^9.0.0",
+    "eslint-plugin-prettier": "^5.0.0",
     "mocha": "^10.2.0",
     "nodemon": "^3.0.1",
     "pre-commit": "^1.2.2",
+    "prettier": "^3.0.2",
+    "server-timing-header": "^1.9.7",
     "swagger-jsdoc": "^6.2.8",
     "swagger-ui-express": "^5.0.0"
   },

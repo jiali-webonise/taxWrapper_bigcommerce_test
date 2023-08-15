@@ -1,7 +1,7 @@
 {
   "diff": true,
   "color": true,
-  "extension": ["test.js","js"],
+  "extension": ["test.js", "js"],
   "opts": false,
   "package": "./package.json",
   "reporter": "spec",

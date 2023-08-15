@@ -26,10 +26,10 @@
 ## Configuration
 
 ### .env file
+1. Create a file in the root of the app called `.env`. 
+2. Copy `.env.example` to `.env`.
+3. Update the `.env` values.
 
-1. Create a file in the root of the app called `.env`
-2. Copy `.env.example` to `.env`
-3. Update the `.env` values
 ## Available REST API Requests
 
 To view all available REST API requests, please visit the [API Documentation](https://taxwrapper.ngrok.app/api-docs).

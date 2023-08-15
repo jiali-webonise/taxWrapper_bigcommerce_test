@@ -11,6 +11,10 @@
 4. Create `.env` file in the root of the app. See Configuration below for more details.
 5. Run server from the command line: `npm start` or `yarn run start`.
 
+## To run the app:
+
+`npm start`
+
 ## To run the test:
 
 `npm run test`
@@ -24,6 +28,8 @@
 ### .env file
 
 Create a file in the root of the app called `.env`
+Copy `.env.example` to `.env`
+Update the `.env` values
 ## Available REST API Requests
 
 To view all available REST API requests, please visit the [API Documentation](https://taxwrapper.ngrok.app/api-docs).

@@ -98,7 +98,8 @@ dotenv.config();
  * /tax/estimate:
  *   post:
  *     summary: post tax estimate object
- *     tags: [Estimate]
+ *     consumes:
+ *      - application/json
  *     parameters:
  *      - in: header
  *        name: X-BC-Store-Hash
@@ -112,6 +113,7 @@ dotenv.config();
  *         application/json:
  *           schema:
  *             $ref: '#/components/schemas/Estimate'
+ *     tags: [Estimate]
  *     responses:
  *       200:
  *         description: The converted estimate object.
@@ -133,4 +135,58 @@ router.post('/', (req, res, next) => {
     next(err);
   }
 });
+
+/**
+ * @swagger
+ * tags:
+ *   name: Estimate
+ *   description: The tax estimate API
+ * /tax/estimate/:app_domain:
+ *   post:
+ *     summary: post tax estimate object
+ *     consumes:
+ *      - application/json
+ *     parameters:
+ *      - in: path
+ *        name: app_domain
+ *        schema:
+ *          type: string
+ *        required: false
+ *        description: App domain.
+ *      - in: header
+ *        name: X-BC-Store-Hash
+ *        schema:
+ *          type: string
+ *        required: true
+ *        description: Store Hash.
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             $ref: '#/components/schemas/Estimate'
+ *     tags: [Estimate]
+ *     responses:
+ *       200:
+ *         description: The converted estimate object.
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/ReturnedEstimate'
+ *       500:
+ *         description: Failed to post estimate.
+ *
+ */
+router.post('/:app_domain', (req, res, next) => {
+  try {
+    const { app_domain } = req.params;
+    console.log('app_domain', app_domain);
+    console.log('req', req.body);
+    const result = { ...req.body, converted: true };
+    return res.status(200).send(JSON.stringify(result));
+  } catch (err) {
+    next(err);
+  }
+});
+
 module.exports = router;

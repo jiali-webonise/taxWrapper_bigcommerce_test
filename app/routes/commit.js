@@ -86,4 +86,55 @@ router.post('/', (req, res, next) => {
     next(err);
   }
 });
+
+/**
+ * @swagger
+ * tags:
+ *   name: Commit
+ *   description: The tax Commit API
+ * /doc/commit/:app_domain:
+ *   post:
+ *     summary: Submit the quote request. A commit operation is intended to be submitted once only, when the Order has been confirmed and paid.
+ *     tags: [Commit]
+ *     parameters:
+ *      - in: path
+ *        name: app_domain
+ *        schema:
+ *          type: string
+ *        required: false
+ *        description: App domain.
+ *      - in: header
+ *        name: X-BC-Store-Hash
+ *        schema:
+ *          type: string
+ *        required: true
+ *        description: Store Hash.
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             $ref: '#/components/schemas/Commit'
+ *     responses:
+ *       200:
+ *         description: The converted commit object.
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Commit'
+ *       500:
+ *         description: Failed to post commit.
+ *
+ */
+router.post('/:app_domain', (req, res, next) => {
+  try {
+    const { app_domain } = req.params;
+    console.log('app_domain', app_domain);
+    console.log('req', req.body);
+    const result = { ...req.body };
+    return res.status(200).send(JSON.stringify(result));
+  } catch (err) {
+    next(err);
+  }
+});
 module.exports = router;

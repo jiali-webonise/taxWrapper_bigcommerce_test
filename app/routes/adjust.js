@@ -53,6 +53,13 @@ dotenv.config();
  *   post:
  *     summary: Replace the persisted tax quote (identified by the given unique ID) with the provided quote request (represented by the AdjustRequest).
  *     tags: [Adjust]
+ *     parameters:
+ *      - in: header
+ *        name: X-BC-Store-Hash
+ *        schema:
+ *          type: string
+ *        required: true
+ *        description: Store Hash.
  *     requestBody:
  *       required: true
  *       content:

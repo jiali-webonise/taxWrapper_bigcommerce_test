@@ -53,6 +53,13 @@ dotenv.config();
  *   post:
  *     summary: Submit the quote request. A commit operation is intended to be submitted once only, when the Order has been confirmed and paid.
  *     tags: [Commit]
+ *     parameters:
+ *      - in: header
+ *        name: X-BC-Store-Hash
+ *        schema:
+ *          type: string
+ *        required: true
+ *        description: Store Hash.
  *     requestBody:
  *       required: true
  *       content:

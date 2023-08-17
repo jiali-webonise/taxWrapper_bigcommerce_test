@@ -99,6 +99,13 @@ dotenv.config();
  *   post:
  *     summary: post tax estimate object
  *     tags: [Estimate]
+ *     parameters:
+ *      - in: header
+ *        name: X-BC-Store-Hash
+ *        schema:
+ *          type: string
+ *        required: true
+ *        description: Store Hash.
  *     requestBody:
  *       required: true
  *       content:
@@ -120,7 +127,7 @@ dotenv.config();
 router.post('/', (req, res, next) => {
   try {
     console.log('req', req.body);
-    const result = { ...req.body, converted: true };
+    const result = {...req.body, converted: true};
     return res.status(200).send(JSON.stringify(result));
   } catch (err) {
     next(err);

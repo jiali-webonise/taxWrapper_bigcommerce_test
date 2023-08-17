@@ -127,7 +127,7 @@ dotenv.config();
 router.post('/', (req, res, next) => {
   try {
     console.log('req', req.body);
-    const result = {...req.body, converted: true};
+    const result = { ...req.body, converted: true };
     return res.status(200).send(JSON.stringify(result));
   } catch (err) {
     next(err);

@@ -11,5 +11,8 @@ module.exports = {
     LOAD: 'load',
     UNINSTALL: 'uninstall',
     ESTIMATE: 'tax/estimate',
+    COMMIT: 'doc/commit',
+    ADJUST: 'doc/adjust',
+    VOID: 'doc/void',
   },
 };

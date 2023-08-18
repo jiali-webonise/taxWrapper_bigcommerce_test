@@ -2,6 +2,7 @@ const express = require('express');
 
 const router = express.Router();
 const dotenv = require('dotenv');
+const { getCountryCode } = require('../../util/util');
 
 dotenv.config();
 
@@ -129,8 +130,11 @@ dotenv.config();
 router.post('/', (req, res, next) => {
   try {
     console.log('req', req.body);
-    const result = { ...req.body, converted: true };
-    return res.status(200).send(JSON.stringify(result));
+    const storeHashValue = req.headers['x-bc-store-hash'];
+    const countryCode = getCountryCode(storeHashValue);
+    console.log('storeHashValue', storeHashValue);
+    console.log('countryCode', countryCode);
+    return res.status(200).send(JSON.stringify(req.body));
   } catch (err) {
     next(err);
   }
@@ -180,6 +184,10 @@ router.post('/', (req, res, next) => {
 router.post('/:app_domain', (req, res, next) => {
   try {
     const { app_domain } = req.params;
+    const storeHashValue = req.headers['x-bc-store-hash'];
+    const countryCode = getCountryCode(storeHashValue);
+    console.log('storeHashValue', storeHashValue);
+    console.log('countryCode', countryCode);
     console.log('app_domain', app_domain);
     console.log('req', req.body);
     const result = { ...req.body, converted: true };

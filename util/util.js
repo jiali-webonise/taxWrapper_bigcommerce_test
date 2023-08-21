@@ -1,6 +1,3 @@
-const dotenv = require('dotenv');
-
-dotenv.config();
 const {
   US_BIGCOMMERCE_STORE_HASH,
   CA_BIGCOMMERCE_STORE_HASH,

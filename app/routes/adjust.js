@@ -1,11 +1,9 @@
 const express = require('express');
 
 const router = express.Router();
-const dotenv = require('dotenv');
 const { getCountryCode } = require('../../util/util');
 const { exampleEstimateTaxResponse } = require('../../util/example');
 
-dotenv.config();
 /**
  * @swagger
  * components:

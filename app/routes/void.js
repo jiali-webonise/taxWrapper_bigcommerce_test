@@ -1,10 +1,7 @@
 const express = require('express');
 
 const router = express.Router();
-const dotenv = require('dotenv');
 const { UnauthorizedError } = require('../services/error-service');
-
-dotenv.config();
 const { ACCESS_TOKEN } = process.env;
 
 /**

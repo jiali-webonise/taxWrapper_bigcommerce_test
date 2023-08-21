@@ -1,12 +1,9 @@
 const express = require('express');
 
 const router = express.Router();
-const dotenv = require('dotenv');
 const { getCountryCode } = require('../../util/util');
 const { UnauthorizedError } = require('../services/error-service');
 const { exampleCommitTaxResponse } = require('../../util/example');
-
-dotenv.config();
 const { ACCESS_TOKEN } = process.env;
 
 /**

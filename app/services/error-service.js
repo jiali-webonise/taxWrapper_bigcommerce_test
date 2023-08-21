@@ -24,7 +24,24 @@ class NoResultsError extends Error {
   }
 }
 
+/**
+ * 401 - Unauthorized
+ *
+ * @param {Object}  [args]      Override arguments for Error.
+ *                              {status, name, message}
+ */
+class UnauthorizedError extends Error {
+  constructor(args) {
+    const { code, name, message } = args || {};
+    super();
+    this.status = code ? code : 401;
+    this.name = name ? name : 'Unauthorized';
+    this.message = message ? message : 'Unauthorized request';
+  }
+}
+
 module.exports = {
   use,
   NoResultsError,
+  UnauthorizedError,
 };

@@ -2,8 +2,10 @@ const express = require('express');
 
 const router = express.Router();
 const dotenv = require('dotenv');
+const { UnauthorizedError } = require('../services/error-service');
 
 dotenv.config();
+const { ACCESS_TOKEN } = process.env;
 
 /**
  * @swagger
@@ -40,6 +42,10 @@ dotenv.config();
 
 router.post('/', (req, res, next) => {
   try {
+    const authToken = req.headers['x-auth-token'];
+    if (!authToken || authToken !== ACCESS_TOKEN) {
+      throw new UnauthorizedError();
+    }
     const storeHashValue = req.headers['x-bc-store-hash'];
     const taxQuoteId = req.query?.id;
     console.log('storeHashValue', storeHashValue);
@@ -91,6 +97,10 @@ router.post('/', (req, res, next) => {
 router.post('/:app_domain', (req, res, next) => {
   try {
     const { app_domain } = req.params;
+    const authToken = req.headers['x-auth-token'];
+    if (!authToken || authToken !== ACCESS_TOKEN) {
+      throw new UnauthorizedError();
+    }
     const storeHashValue = req.headers['x-bc-store-hash'];
     const taxQuoteId = req.query?.id;
     console.log('storeHashValue', storeHashValue);

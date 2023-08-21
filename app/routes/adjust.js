@@ -76,12 +76,12 @@ dotenv.config();
  *             schema:
  *               $ref: '#/components/schemas/Estimate'
  *       400:
- *         description: Not found
+ *         description: Bad Request Error
  *         content:
  *           text/plain:
  *             schema:
  *               type: string
- *               example: Not Found
+ *               example: Bad Request Error
  *       401:
  *         description: Not authenticated. Response to indicate that the merchant’s authentication credentials are invalid. The merchant will receive an update in their Store Logs.
  *         content:
@@ -148,12 +148,12 @@ router.post('/', (req, res, next) => {
  *             schema:
  *               $ref: '#/components/schemas/Adjust'
  *       400:
- *         description: Not found
+ *         description: Bad Request Error
  *         content:
  *           text/plain:
  *             schema:
  *               type: string
- *               example: Not Found
+ *               example: Bad Request Error
  *       401:
  *         description: Not authenticated. Response to indicate that the merchant’s authentication credentials are invalid. The merchant will receive an update in their Store Logs.
  *         content:

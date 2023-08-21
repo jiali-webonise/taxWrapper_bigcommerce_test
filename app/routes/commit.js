@@ -77,6 +77,8 @@ const { ACCESS_TOKEN } = process.env;
  *           application/json:
  *             schema:
  *               $ref: '#/components/schemas/Commit'
+ *       401:
+ *         description: Not authenticated
  *       500:
  *         description: Failed to post commit.
  *
@@ -134,6 +136,8 @@ router.post('/', (req, res, next) => {
  *           application/json:
  *             schema:
  *               $ref: '#/components/schemas/Commit'
+ *       401:
+ *         description: Not authenticated
  *       500:
  *         description: Failed to post commit.
  *

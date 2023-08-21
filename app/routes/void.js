@@ -35,6 +35,8 @@ const { ACCESS_TOKEN } = process.env;
  *     responses:
  *       200:
  *         description: OK.
+ *       401:
+ *         description: Not authenticated. Response to indicate that the merchant’s authentication credentials are invalid. The merchant will receive an update in their Store Logs.
  *       500:
  *         description: Failed to post commit.
  *

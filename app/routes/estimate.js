@@ -7,6 +7,17 @@ const { UnauthorizedError } = require('../services/error-service');
 
 dotenv.config();
 const { ACCESS_TOKEN } = process.env;
+
+/**
+ * @swagger
+ * components:
+ *   securitySchemes:
+ *     ApiKeyAuth:
+ *       type: apiKey
+ *       in: header
+ *       name: x-auth-token
+ */
+
 /**
  * @swagger
  * components:
@@ -99,6 +110,8 @@ const { ACCESS_TOKEN } = process.env;
  *   description: The tax estimate API
  * /tax/estimate:
  *   post:
+ *     security:
+ *       - ApiKeyAuth: []
  *     summary: post tax estimate object
  *     consumes:
  *      - application/json
@@ -123,6 +136,8 @@ const { ACCESS_TOKEN } = process.env;
  *           application/json:
  *             schema:
  *               $ref: '#/components/schemas/ReturnedEstimate'
+ *       401:
+ *         description: Not authenticated. Response to indicate that the merchant’s authentication credentials are invalid. The merchant will receive an update in their Store Logs.
  *       500:
  *         description: Failed to post estimate.
  *
@@ -182,6 +197,8 @@ router.post('/', (req, res, next) => {
  *           application/json:
  *             schema:
  *               $ref: '#/components/schemas/ReturnedEstimate'
+ *       401:
+ *         description: Not authenticated. Response to indicate that the merchant’s authentication credentials are invalid. The merchant will receive an update in their Store Logs.
  *       500:
  *         description: Failed to post estimate.
  *

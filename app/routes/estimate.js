@@ -4,6 +4,7 @@ const router = express.Router();
 const dotenv = require('dotenv');
 const { getCountryCode } = require('../../util/util');
 const { UnauthorizedError } = require('../services/error-service');
+const { exampleEstimateTaxResponse } = require('../../util/example');
 
 dotenv.config();
 const { ACCESS_TOKEN } = process.env;
@@ -75,32 +76,12 @@ const { ACCESS_TOKEN } = process.env;
  *         id:
  *           type: string
  *           description: The auto-generated id of the estimate
- *         currency_code:
- *           type: string
- *           description: The currency code
- *         customer:
- *           type: object
- *           description: The customer object
- *         transaction_date:
- *           type: string
- *           description: The transaction date
  *         documents:
  *           type: object
  *           description: The documents object
- *         converted:
- *           type: boolean
- *           description: This estimate is converted
  *       example:
  *         id: 3f0c857e
- *         currency_code: USD
- *         customer: {
- *            "customer_id": "0",
- *            "customer_group_id": "0",
- *            "taxability_code": ""
- *         }
- *         transaction_date: 2019-08-13T03:17:37+00:00
- *         documents: {}
- *         converted: true
+ *         documents: [{}]
  */
 
 /**
@@ -136,11 +117,27 @@ const { ACCESS_TOKEN } = process.env;
  *           application/json:
  *             schema:
  *               $ref: '#/components/schemas/ReturnedEstimate'
+ *       400:
+ *         description: Not found
+ *         content:
+ *           text/plain:
+ *             schema:
+ *               type: string
+ *               example: Not Found
  *       401:
  *         description: Not authenticated. Response to indicate that the merchant’s authentication credentials are invalid. The merchant will receive an update in their Store Logs.
+ *         content:
+ *           text/plain:
+ *             schema:
+ *               type: string
+ *               example: Unauthorized request
  *       500:
  *         description: Failed to post estimate.
- *
+ *         content:
+ *           text/plain:
+ *             schema:
+ *               type: string
+ *               example: Internal Error
  */
 
 router.post('/', (req, res, next) => {
@@ -197,11 +194,27 @@ router.post('/', (req, res, next) => {
  *           application/json:
  *             schema:
  *               $ref: '#/components/schemas/ReturnedEstimate'
+ *       400:
+ *         description: Not found
+ *         content:
+ *           text/plain:
+ *             schema:
+ *               type: string
+ *               example: Not Found
  *       401:
  *         description: Not authenticated. Response to indicate that the merchant’s authentication credentials are invalid. The merchant will receive an update in their Store Logs.
+ *         content:
+ *           text/plain:
+ *             schema:
+ *               type: string
+ *               example: Unauthorized request
  *       500:
  *         description: Failed to post estimate.
- *
+ *         content:
+ *           text/plain:
+ *             schema:
+ *               type: string
+ *               example: Internal Error
  */
 router.post('/:app_domain', (req, res, next) => {
   try {
@@ -216,8 +229,7 @@ router.post('/:app_domain', (req, res, next) => {
     console.log('countryCode', countryCode);
     console.log('app_domain', app_domain);
     console.log('req', req.body);
-    const result = { ...req.body, converted: true };
-    return res.status(200).send(JSON.stringify(result));
+    return res.status(200).send(JSON.stringify(exampleEstimateTaxResponse));
   } catch (err) {
     next(err);
   }

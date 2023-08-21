@@ -35,10 +35,32 @@ const { ACCESS_TOKEN } = process.env;
  *     responses:
  *       200:
  *         description: OK.
+ *         content:
+ *           text/plain:
+ *             schema:
+ *               type: string
+ *               example: OK
  *       401:
  *         description: Not authenticated. Response to indicate that the merchant’s authentication credentials are invalid. The merchant will receive an update in their Store Logs.
+ *         content:
+ *           text/plain:
+ *             schema:
+ *               type: string
+ *               example: Unauthorized request
+ *       400:
+ *         description: Not found
+ *         content:
+ *           text/plain:
+ *             schema:
+ *               type: string
+ *               example: Not Found
  *       500:
- *         description: Failed to post commit.
+ *         description: Failed to invalidate the persisted tax quote.
+ *         content:
+ *           text/plain:
+ *             schema:
+ *               type: string
+ *               example: Internal Error
  *
  */
 
@@ -92,8 +114,32 @@ router.post('/', (req, res, next) => {
  *     responses:
  *       200:
  *         description: OK.
+ *         content:
+ *           text/plain:
+ *             schema:
+ *               type: string
+ *               example: OK
+ *       400:
+ *         description: Not found
+ *         content:
+ *           text/plain:
+ *             schema:
+ *               type: string
+ *               example: Not Found
+ *       401:
+ *         description: Not authenticated. Response to indicate that the merchant’s authentication credentials are invalid. The merchant will receive an update in their Store Logs.
+ *         content:
+ *           text/plain:
+ *             schema:
+ *               type: string
+ *               example: Unauthorized request
  *       500:
- *         description: Failed to post commit.
+ *         description: Failed to invalidate the persisted tax quote.
+ *         content:
+ *           text/plain:
+ *             schema:
+ *               type: string
+ *               example: Internal Error
  *
  */
 router.post('/:app_domain', (req, res, next) => {

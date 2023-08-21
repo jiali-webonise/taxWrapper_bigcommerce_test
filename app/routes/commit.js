@@ -4,6 +4,7 @@ const router = express.Router();
 const dotenv = require('dotenv');
 const { getCountryCode } = require('../../util/util');
 const { UnauthorizedError } = require('../services/error-service');
+const { exampleCommitTaxResponse } = require('../../util/example');
 
 dotenv.config();
 const { ACCESS_TOKEN } = process.env;
@@ -76,11 +77,28 @@ const { ACCESS_TOKEN } = process.env;
  *         content:
  *           application/json:
  *             schema:
- *               $ref: '#/components/schemas/Commit'
+ *               $ref: '#/components/schemas/ReturnedEstimate'
+ *       400:
+ *         description: Not found
+ *         content:
+ *           text/plain:
+ *             schema:
+ *               type: string
+ *               example: Not Found
  *       401:
- *         description: Not authenticated
+ *         description: Not authenticated. Response to indicate that the merchant’s authentication credentials are invalid. The merchant will receive an update in their Store Logs.
+ *         content:
+ *           text/plain:
+ *             schema:
+ *               type: string
+ *               example: Unauthorized request
  *       500:
  *         description: Failed to post commit.
+ *         content:
+ *           text/plain:
+ *             schema:
+ *               type: string
+ *               example: Internal Error
  *
  */
 
@@ -95,7 +113,7 @@ router.post('/', (req, res, next) => {
     console.log('storeHashValue', storeHashValue);
     console.log('countryCode', countryCode);
     console.log('req', req.body);
-    return res.status(200).send(JSON.stringify(req.body));
+    return res.status(200).send(JSON.stringify(exampleCommitTaxResponse));
   } catch (err) {
     next(err);
   }
@@ -135,11 +153,28 @@ router.post('/', (req, res, next) => {
  *         content:
  *           application/json:
  *             schema:
- *               $ref: '#/components/schemas/Commit'
+ *               $ref: '#/components/schemas/ReturnedEstimate'
+ *       400:
+ *         description: Not found
+ *         content:
+ *           text/plain:
+ *             schema:
+ *               type: string
+ *               example: Not Found
  *       401:
- *         description: Not authenticated
+ *         description: Not authenticated. Response to indicate that the merchant’s authentication credentials are invalid. The merchant will receive an update in their Store Logs.
+ *         content:
+ *           text/plain:
+ *             schema:
+ *               type: string
+ *               example: Unauthorized request
  *       500:
  *         description: Failed to post commit.
+ *         content:
+ *           text/plain:
+ *             schema:
+ *               type: string
+ *               example: Internal Error
  *
  */
 router.post('/:app_domain', (req, res, next) => {
@@ -157,8 +192,7 @@ router.post('/:app_domain', (req, res, next) => {
     console.log('countryCode', countryCode);
     console.log('app_domain', app_domain);
     console.log('req', req.body);
-    const result = { ...req.body };
-    return res.status(200).send(JSON.stringify(result));
+    return res.status(200).send(JSON.stringify(exampleCommitTaxResponse));
   } catch (err) {
     next(err);
   }

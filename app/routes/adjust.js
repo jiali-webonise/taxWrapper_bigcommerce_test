@@ -3,6 +3,7 @@ const express = require('express');
 const router = express.Router();
 const dotenv = require('dotenv');
 const { getCountryCode } = require('../../util/util');
+const { exampleEstimateTaxResponse } = require('../../util/example');
 
 dotenv.config();
 /**
@@ -73,11 +74,28 @@ dotenv.config();
  *         content:
  *           application/json:
  *             schema:
- *               $ref: '#/components/schemas/Adjust'
+ *               $ref: '#/components/schemas/Estimate'
+ *       400:
+ *         description: Not found
+ *         content:
+ *           text/plain:
+ *             schema:
+ *               type: string
+ *               example: Not Found
  *       401:
  *         description: Not authenticated. Response to indicate that the merchant’s authentication credentials are invalid. The merchant will receive an update in their Store Logs.
+ *         content:
+ *           text/plain:
+ *             schema:
+ *               type: string
+ *               example: Unauthorized request
  *       500:
  *         description: Failed to post Adjust.
+ *         content:
+ *           text/plain:
+ *             schema:
+ *               type: string
+ *               example: Internal Error
  *
  */
 
@@ -88,7 +106,7 @@ router.post('/', (req, res, next) => {
     const countryCode = getCountryCode(storeHashValue);
     console.log('storeHashValue', storeHashValue);
     console.log('countryCode', countryCode);
-    return res.status(200).send(JSON.stringify(req.body));
+    return res.status(200).send(JSON.stringify(exampleEstimateTaxResponse));
   } catch (err) {
     next(err);
   }
@@ -129,10 +147,27 @@ router.post('/', (req, res, next) => {
  *           application/json:
  *             schema:
  *               $ref: '#/components/schemas/Adjust'
+ *       400:
+ *         description: Not found
+ *         content:
+ *           text/plain:
+ *             schema:
+ *               type: string
+ *               example: Not Found
  *       401:
  *         description: Not authenticated. Response to indicate that the merchant’s authentication credentials are invalid. The merchant will receive an update in their Store Logs.
+ *         content:
+ *           text/plain:
+ *             schema:
+ *               type: string
+ *               example: Unauthorized request
  *       500:
  *         description: Failed to post Adjust.
+ *         content:
+ *           text/plain:
+ *             schema:
+ *               type: string
+ *               example: Internal Error
  *
  */
 router.post('/:app_domain', (req, res, next) => {
@@ -144,7 +179,7 @@ router.post('/:app_domain', (req, res, next) => {
     console.log('countryCode', countryCode);
     console.log('app_domain', app_domain);
     console.log('req', req.body);
-    return res.status(200).send(JSON.stringify(req.body));
+    return res.status(200).send(JSON.stringify(exampleEstimateTaxResponse));
   } catch (err) {
     next(err);
   }

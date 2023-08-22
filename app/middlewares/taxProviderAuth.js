@@ -10,7 +10,7 @@ const { ACCESS_TOKEN } = process.env;
  * @param   {Object}   res         Express response object.
  * @param   {function} next        Express next function. Pass control to next middleware.
  */
-const isAuthenticated = async (req, res, next) => {
+const isBCTaxProviderAuthenticated = async (req, res, next) => {
   // confirm correct auth headers are sent with request and access token is present
   const authToken = req.headers['x-auth-token'];
   if (authToken === null) return res.status(BAD_REQUEST.code).send({ error: 'Token not present' });
@@ -23,5 +23,5 @@ const isAuthenticated = async (req, res, next) => {
 };
 
 module.exports = {
-  isAuthenticated,
+  isBCTaxProviderAuthenticated,
 };

@@ -12,7 +12,7 @@ const adjustRoutes = require('./adjust.js');
 const voidRoutes = require('./void.js');
 
 const options = require('../../config/swagger-config.js');
-const { isAuthenticated } = require('../middlewares/isAuth.js');
+const { isBCTaxProviderAuthenticated } = require('../middlewares/taxProviderAuth.js');
 
 module.exports = function (app) {
   app.use((req, res, next) => {
@@ -26,10 +26,10 @@ module.exports = function (app) {
   app.use(`${API_BASE_PATH}/${RESOURCE.LOAD}`, loadRoutes);
   app.use(`${API_BASE_PATH}/${RESOURCE.UNINSTALL}`, uninstallRoutes);
 
-  app.use(`${API_BASE_PATH}/${RESOURCE.ESTIMATE}`, isAuthenticated, estimateRoutes);
-  app.use(`${API_BASE_PATH}/${RESOURCE.COMMIT}`, isAuthenticated, commitRoutes);
-  app.use(`${API_BASE_PATH}/${RESOURCE.ADJUST}`, isAuthenticated, adjustRoutes);
-  app.use(`${API_BASE_PATH}/${RESOURCE.VOID}`, isAuthenticated, voidRoutes);
+  app.use(`${API_BASE_PATH}/${RESOURCE.ESTIMATE}`, isBCTaxProviderAuthenticated, estimateRoutes);
+  app.use(`${API_BASE_PATH}/${RESOURCE.COMMIT}`, isBCTaxProviderAuthenticated, commitRoutes);
+  app.use(`${API_BASE_PATH}/${RESOURCE.ADJUST}`, isBCTaxProviderAuthenticated, adjustRoutes);
+  app.use(`${API_BASE_PATH}/${RESOURCE.VOID}`, isBCTaxProviderAuthenticated, voidRoutes);
 
   app.use(`${API_BASE_PATH}/${RESOURCE.USERS}`, userRoutes);
 

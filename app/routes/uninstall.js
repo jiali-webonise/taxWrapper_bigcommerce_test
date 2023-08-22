@@ -2,9 +2,6 @@ const express = require('express');
 
 const router = express.Router();
 const BigCommerce = require('node-bigcommerce');
-const dotenv = require('dotenv');
-
-dotenv.config();
 
 const bigCommerce = new BigCommerce({
   secret: process.env.CLIENT_SECRET,

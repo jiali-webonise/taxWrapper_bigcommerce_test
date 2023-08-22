@@ -2,23 +2,13 @@ const express = require('express');
 
 const router = express.Router();
 const { getCountryCode } = require('../../util/util');
-const { exampleEstimateTaxResponse } = require('../../util/example');
-
-/**
- * @swagger
- * components:
- *   securitySchemes:
- *     ApiKeyAuth:
- *       type: apiKey
- *       in: header
- *       name: x-auth-token
- */
+const { exampleCommitTaxResponse } = require('../../util/example');
 
 /**
  * @swagger
  * components:
  *   schemas:
- *     Estimate:
+ *     Commit:
  *       type: object
  *       required:
  *         - id
@@ -56,41 +46,13 @@ const { exampleEstimateTaxResponse } = require('../../util/example');
 
 /**
  * @swagger
- * components:
- *   schemas:
- *     ReturnedEstimate:
- *       type: object
- *       required:
- *         - id
- *         - currency_code
- *         - customer
- *         - transaction_date
- *         - documents
- *         - converted
- *       properties:
- *         id:
- *           type: string
- *           description: The auto-generated id of the estimate
- *         documents:
- *           type: object
- *           description: The documents object
- *       example:
- *         id: 3f0c857e
- *         documents: [{}]
- */
-
-/**
- * @swagger
  * tags:
- *   name: Estimate
- *   description: The tax estimate API
- * /tax/estimate:
+ *   name: Commit
+ *   description: The tax Commit API
+ * /doc/commit:
  *   post:
- *     security:
- *       - ApiKeyAuth: []
- *     summary: post tax estimate object
- *     consumes:
- *      - application/json
+ *     summary: Submit the quote request. A commit operation is intended to be submitted once only, when the Order has been confirmed and paid.
+ *     tags: [Commit]
  *     parameters:
  *      - in: header
  *        name: X-BC-Store-Hash
@@ -103,11 +65,10 @@ const { exampleEstimateTaxResponse } = require('../../util/example');
  *       content:
  *         application/json:
  *           schema:
- *             $ref: '#/components/schemas/Estimate'
- *     tags: [Estimate]
+ *             $ref: '#/components/schemas/Commit'
  *     responses:
  *       200:
- *         description: The converted estimate object.
+ *         description: The converted commit object.
  *         content:
  *           application/json:
  *             schema:
@@ -127,22 +88,23 @@ const { exampleEstimateTaxResponse } = require('../../util/example');
  *               type: string
  *               example: Unauthorized request
  *       500:
- *         description: Failed to post estimate.
+ *         description: Failed to post commit.
  *         content:
  *           text/plain:
  *             schema:
  *               type: string
  *               example: Internal Error
+ *
  */
 
 router.post('/', (req, res, next) => {
   try {
-    console.log('req', req.body);
     const storeHashValue = req.headers['x-bc-store-hash'];
     const countryCode = getCountryCode(storeHashValue);
     console.log('storeHashValue', storeHashValue);
     console.log('countryCode', countryCode);
-    return res.status(200).send(JSON.stringify(req.body));
+    console.log('req', req.body);
+    return res.status(200).send(JSON.stringify(exampleCommitTaxResponse));
   } catch (err) {
     next(err);
   }
@@ -151,13 +113,12 @@ router.post('/', (req, res, next) => {
 /**
  * @swagger
  * tags:
- *   name: Estimate
- *   description: The tax estimate API
- * /tax/estimate/:app_domain:
+ *   name: Commit
+ *   description: The tax Commit API
+ * /doc/commit/:app_domain:
  *   post:
- *     summary: post tax estimate object
- *     consumes:
- *      - application/json
+ *     summary: Submit the quote request. A commit operation is intended to be submitted once only, when the Order has been confirmed and paid.
+ *     tags: [Commit]
  *     parameters:
  *      - in: path
  *        name: app_domain
@@ -176,11 +137,10 @@ router.post('/', (req, res, next) => {
  *       content:
  *         application/json:
  *           schema:
- *             $ref: '#/components/schemas/Estimate'
- *     tags: [Estimate]
+ *             $ref: '#/components/schemas/Commit'
  *     responses:
  *       200:
- *         description: The converted estimate object.
+ *         description: The converted commit object.
  *         content:
  *           application/json:
  *             schema:
@@ -200,12 +160,13 @@ router.post('/', (req, res, next) => {
  *               type: string
  *               example: Unauthorized request
  *       500:
- *         description: Failed to post estimate.
+ *         description: Failed to post commit.
  *         content:
  *           text/plain:
  *             schema:
  *               type: string
  *               example: Internal Error
+ *
  */
 router.post('/:app_domain', (req, res, next) => {
   try {
@@ -216,10 +177,9 @@ router.post('/:app_domain', (req, res, next) => {
     console.log('countryCode', countryCode);
     console.log('app_domain', app_domain);
     console.log('req', req.body);
-    return res.status(200).send(JSON.stringify(exampleEstimateTaxResponse));
+    return res.status(200).send(JSON.stringify(exampleCommitTaxResponse));
   } catch (err) {
     next(err);
   }
 });
-
 module.exports = router;

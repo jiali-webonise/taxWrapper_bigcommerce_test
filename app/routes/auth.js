@@ -1,8 +1,6 @@
 const express = require('express');
 const BigCommerce = require('node-bigcommerce');
-const dotenv = require('dotenv');
 
-dotenv.config();
 const router = express.Router();
 
 const { API_URL, AUTH_CALLBACK, CLIENT_ID, CLIENT_SECRET, LOGIN_URL } = process.env;

@@ -7,18 +7,8 @@ const { exampleEstimateTaxResponse } = require('../../util/example');
 /**
  * @swagger
  * components:
- *   securitySchemes:
- *     ApiKeyAuth:
- *       type: apiKey
- *       in: header
- *       name: x-auth-token
- */
-
-/**
- * @swagger
- * components:
  *   schemas:
- *     Estimate:
+ *     Adjust:
  *       type: object
  *       required:
  *         - id
@@ -56,41 +46,13 @@ const { exampleEstimateTaxResponse } = require('../../util/example');
 
 /**
  * @swagger
- * components:
- *   schemas:
- *     ReturnedEstimate:
- *       type: object
- *       required:
- *         - id
- *         - currency_code
- *         - customer
- *         - transaction_date
- *         - documents
- *         - converted
- *       properties:
- *         id:
- *           type: string
- *           description: The auto-generated id of the estimate
- *         documents:
- *           type: object
- *           description: The documents object
- *       example:
- *         id: 3f0c857e
- *         documents: [{}]
- */
-
-/**
- * @swagger
  * tags:
- *   name: Estimate
- *   description: The tax estimate API
- * /tax/estimate:
+ *   name: Adjust
+ *   description: The tax Adjust API
+ * /doc/adjust:
  *   post:
- *     security:
- *       - ApiKeyAuth: []
- *     summary: post tax estimate object
- *     consumes:
- *      - application/json
+ *     summary: Replace the persisted tax quote (identified by the given unique ID) with the provided quote request (represented by the AdjustRequest).
+ *     tags: [Adjust]
  *     parameters:
  *      - in: header
  *        name: X-BC-Store-Hash
@@ -103,15 +65,14 @@ const { exampleEstimateTaxResponse } = require('../../util/example');
  *       content:
  *         application/json:
  *           schema:
- *             $ref: '#/components/schemas/Estimate'
- *     tags: [Estimate]
+ *             $ref: '#/components/schemas/Adjust'
  *     responses:
  *       200:
- *         description: The converted estimate object.
+ *         description: The Adjust object.
  *         content:
  *           application/json:
  *             schema:
- *               $ref: '#/components/schemas/ReturnedEstimate'
+ *               $ref: '#/components/schemas/Estimate'
  *       400:
  *         description: Bad Request Error
  *         content:
@@ -127,12 +88,13 @@ const { exampleEstimateTaxResponse } = require('../../util/example');
  *               type: string
  *               example: Unauthorized request
  *       500:
- *         description: Failed to post estimate.
+ *         description: Failed to post Adjust.
  *         content:
  *           text/plain:
  *             schema:
  *               type: string
  *               example: Internal Error
+ *
  */
 
 router.post('/', (req, res, next) => {
@@ -142,7 +104,7 @@ router.post('/', (req, res, next) => {
     const countryCode = getCountryCode(storeHashValue);
     console.log('storeHashValue', storeHashValue);
     console.log('countryCode', countryCode);
-    return res.status(200).send(JSON.stringify(req.body));
+    return res.status(200).send(JSON.stringify(exampleEstimateTaxResponse));
   } catch (err) {
     next(err);
   }
@@ -151,13 +113,12 @@ router.post('/', (req, res, next) => {
 /**
  * @swagger
  * tags:
- *   name: Estimate
- *   description: The tax estimate API
- * /tax/estimate/:app_domain:
+ *   name: Adjust
+ *   description: The tax Adjust API
+ * /doc/adjust/:app_domain:
  *   post:
- *     summary: post tax estimate object
- *     consumes:
- *      - application/json
+ *     summary: Replace the persisted tax quote (identified by the given unique ID) with the provided quote request (represented by the AdjustRequest).
+ *     tags: [Adjust]
  *     parameters:
  *      - in: path
  *        name: app_domain
@@ -176,15 +137,14 @@ router.post('/', (req, res, next) => {
  *       content:
  *         application/json:
  *           schema:
- *             $ref: '#/components/schemas/Estimate'
- *     tags: [Estimate]
+ *             $ref: '#/components/schemas/Adjust'
  *     responses:
  *       200:
- *         description: The converted estimate object.
+ *         description: The Adjust object.
  *         content:
  *           application/json:
  *             schema:
- *               $ref: '#/components/schemas/ReturnedEstimate'
+ *               $ref: '#/components/schemas/Adjust'
  *       400:
  *         description: Bad Request Error
  *         content:
@@ -200,12 +160,13 @@ router.post('/', (req, res, next) => {
  *               type: string
  *               example: Unauthorized request
  *       500:
- *         description: Failed to post estimate.
+ *         description: Failed to post Adjust.
  *         content:
  *           text/plain:
  *             schema:
  *               type: string
  *               example: Internal Error
+ *
  */
 router.post('/:app_domain', (req, res, next) => {
   try {
@@ -221,5 +182,4 @@ router.post('/:app_domain', (req, res, next) => {
     next(err);
   }
 });
-
 module.exports = router;

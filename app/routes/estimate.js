@@ -135,7 +135,7 @@ const { exampleEstimateTaxResponse } = require('../../util/example');
  *               example: Internal Error
  */
 
-router.post('/', (req, res, next) => {
+router.post('/', async (req, res, next) => {
   try {
     console.log('req', req.body);
     const storeHashValue = req.headers['x-bc-store-hash'];

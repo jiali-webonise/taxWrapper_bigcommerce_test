@@ -15,4 +15,8 @@ module.exports = {
     ADJUST: 'doc/adjust',
     VOID: 'doc/void',
   },
+  AVALARA_PATH: {
+    PING: 'utilities/ping',
+    CREATE_TRANSICATION: 'transactions/create'
+  }
 };

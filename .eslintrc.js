@@ -22,7 +22,24 @@ module.exports = {
   },
   rules: {
     'prettier/prettier': ['error', { endOfLine: 'auto' }, { usePrettierrc: true }],
-    indent: ['error', 2, { SwitchCase: 1 }],
+    indent: [
+      'error',
+      2,
+      {
+        SwitchCase: 1,
+        ignoredNodes: [
+          'ConditionalExpression', 
+          'FunctionDeclaration':{
+            "body": 1,
+            "parameters": 2
+          },
+          'FunctionExpression':{
+            "body": 1,
+            "parameters": 2
+          }
+        ],
+      },
+    ],
     'linebreak-style': 0,
     quotes: ['error', 'single'],
     semi: ['error', 'always'],

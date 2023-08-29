@@ -1,6 +1,6 @@
 const winston = require('winston');
 const { BAD_REQUEST, UNAUTHORIZED } = require('../../config/api-config');
-const { ACCESS_TOKEN } = process.env;
+const { AUTH_TAX_PROVIDER } = process.env;
 
 /**
  * Confirm API call is authenticated
@@ -12,10 +12,10 @@ const { ACCESS_TOKEN } = process.env;
  */
 const isBCTaxProviderAuthenticated = async (req, res, next) => {
   // confirm correct auth headers are sent with request and access token is present
-  const authToken = req.headers['x-auth-token'];
-  if (authToken === null) return res.status(BAD_REQUEST.code).send({ error: 'Token not present' });
+  const authorizationCode = req.headers.authorization;
+  if (authorizationCode === null) return res.status(BAD_REQUEST.code).send({ error: 'Token not present' });
 
-  if (!authToken || authToken !== ACCESS_TOKEN) {
+  if (!authorizationCode || authorizationCode !== `Basic ${AUTH_TAX_PROVIDER}`) {
     winston.error(`${UNAUTHORIZED.code} - ${UNAUTHORIZED.description}`);
     return res.status(UNAUTHORIZED.code).send({ error: UNAUTHORIZED.description });
   }

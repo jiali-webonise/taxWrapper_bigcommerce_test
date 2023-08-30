@@ -1,7 +1,7 @@
 const express = require('express');
 
 const router = express.Router();
-const { getCountryCode } = require('../../util/util');
+const { getCountryCode, getCalculatedResponse, getTransformedResponse } = require('../../util/util');
 const { exampleEstimateTaxResponse } = require('../../util/example');
 
 /**
@@ -11,7 +11,7 @@ const { exampleEstimateTaxResponse } = require('../../util/example');
  *     ApiKeyAuth:
  *       type: apiKey
  *       in: header
- *       name: x-auth-token
+ *       name: authorization
  */
 
 /**
@@ -62,11 +62,7 @@ const { exampleEstimateTaxResponse } = require('../../util/example');
  *       type: object
  *       required:
  *         - id
- *         - currency_code
- *         - customer
- *         - transaction_date
  *         - documents
- *         - converted
  *       properties:
  *         id:
  *           type: string
@@ -76,7 +72,73 @@ const { exampleEstimateTaxResponse } = require('../../util/example');
  *           description: The documents object
  *       example:
  *         id: 3f0c857e
- *         documents: [{}]
+ *         documents: [{
+ *           id: 'document-id',
+ *           items: [{
+ *             id: '088c7465-e5b8-4624-a220-0d9faa82e7cb',
+ *             price: {
+ *               amount_inclusive: 675,
+ *               amount_exclusive: 450,
+ *               total_tax: 225,
+ *               tax_rate: 0.5,
+ *               sales_tax_summary: [
+ *               {
+ *                  name: 'Brutal Tax',
+ *                  rate: 0.5,
+ *                  amount: 225,
+ *                  tax_class: {
+ *                    class_id: '0',
+ *                    name: 'Brutal Tax',
+ *                    code: 'US',
+ *                  },
+ *                  id: 'Brutal Tax',
+ *               }],
+ *             },
+ *             type: 'item',
+ *           }],
+ *           shipping: {
+ *             id: '5d522b889d3d9',
+ *             price: {
+ *               amount_inclusive: 15,
+ *               amount_exclusive: 10,
+ *               total_tax: 5,
+ *               tax_rate: 0.5,
+ *               sales_tax_summary: [{
+ *                 name: 'Brutal Tax',
+ *                 rate: 0.5,
+ *                 amount: 5,
+ *                 tax_class: {
+ *                   class_id: '0',
+ *                   name: 'Brutal Tax',
+ *                   code: 'US',
+ *                 },
+ *                 id: 'Brutal Tax',
+ *              }]
+ *            },
+ *            type: 'shipping',
+ *           },
+ *           handling: {
+ *             id: '5d522b889d3d9',
+ *             price: {
+ *               amount_inclusive: 0,
+ *               amount_exclusive: 0,
+ *               total_tax: 0,
+ *               tax_rate: 0.5,
+ *               sales_tax_summary: [{
+ *                 name: 'Brutal Tax',
+ *                 rate: 0.5,
+ *                 amount: 0,
+ *                 tax_class: {
+ *                   class_id: '0',
+ *                   name: 'Brutal Tax',
+ *                   code: 'US',
+ *                 },
+ *                 id: 'Brutal Tax',
+ *              }]
+ *            },
+ *           type: 'handling',
+ *          }
+ *       }]
  */
 
 /**
@@ -137,92 +199,13 @@ const { exampleEstimateTaxResponse } = require('../../util/example');
 
 router.post('/', async (req, res, next) => {
   try {
-    console.log('req', req.body);
+    const quoteId = req.body.id;
     const storeHashValue = req.headers['x-bc-store-hash'];
     const countryCode = getCountryCode(storeHashValue);
     console.log('storeHashValue', storeHashValue);
     console.log('countryCode', countryCode);
-    const quoteId = req.body.id;
-    const exampleResponse = {
-      documents: [
-        {
-          id: 'document-id',
-          items: [
-            {
-              id: '088c7465-e5b8-4624-a220-0d9faa82e7cb',
-              price: {
-                amount_inclusive: 675,
-                amount_exclusive: 450,
-                total_tax: 225,
-                tax_rate: 0.5,
-                sales_tax_summary: [
-                  {
-                    name: 'Brutal Tax',
-                    rate: 0.5,
-                    amount: 225,
-                    tax_class: {
-                      class_id: '0',
-                      name: 'Brutal Tax',
-                      code: 'US',
-                    },
-                    id: 'Brutal Tax',
-                  },
-                ],
-              },
-              type: 'item',
-            },
-          ],
-          shipping: {
-            id: '5d522b889d3d9',
-            price: {
-              amount_inclusive: 15,
-              amount_exclusive: 10,
-              total_tax: 5,
-              tax_rate: 0.5,
-              sales_tax_summary: [
-                {
-                  name: 'Brutal Tax',
-                  rate: 0.5,
-                  amount: 5,
-                  tax_class: {
-                    class_id: '0',
-                    name: 'Brutal Tax',
-                    code: 'US',
-                  },
-                  id: 'Brutal Tax',
-                },
-              ],
-            },
-            type: 'shipping',
-          },
-          handling: {
-            id: '5d522b889d3d9',
-            price: {
-              amount_inclusive: 0,
-              amount_exclusive: 0,
-              total_tax: 0,
-              tax_rate: 0.5,
-              sales_tax_summary: [
-                {
-                  name: 'Brutal Tax',
-                  rate: 0.5,
-                  amount: 0,
-                  tax_class: {
-                    class_id: '0',
-                    name: 'Brutal Tax',
-                    code: 'US',
-                  },
-                  id: 'Brutal Tax',
-                },
-              ],
-            },
-            type: 'handling',
-          },
-        },
-      ],
-      id: quoteId,
-    };
-    return res.status(200).send(exampleResponse);
+    const expectedResponse = getTransformedResponse(req.body.documents, quoteId);
+    return res.status(200).send(expectedResponse);
   } catch (err) {
     next(err);
   }

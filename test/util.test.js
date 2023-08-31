@@ -4,8 +4,8 @@ const {
   getCountryCode,
   checkNumberIsNaNAndInfinity,
   roundOffValue,
-  getAmountExclusiveByTaxRate,
-  getAmountInclusiveByTaxRate,
+  checkIsFlatTaxRate,
+  getFlatTaxRate,
 } = require('../util/util');
 
 describe('utils method test', () => {
@@ -73,16 +73,24 @@ describe('utils method test', () => {
       assert.equal(result3, Number(v3.toFixed(2)));
     });
   });
-  describe('testing getAmountExclusiveByTaxRate', () => {
-    it('should return getAmountExclusiveByTaxRate value accordingly', () => {
-      const result = getAmountExclusiveByTaxRate(100, 0.15);
-      assert.equal(result, roundOffValue(100 / 1.15));
+
+  describe('testing checkIsFlatTaxRate', () => {
+    it('should return checkIsFlatTaxRate value accordingly', () => {
+      const result1 = checkIsFlatTaxRate(null);
+      assert.equal(result1, false);
+      const result2 = checkIsFlatTaxRate('JP');
+      assert.equal(result2, true);
+      const result3 = checkIsFlatTaxRate('US');
+      assert.equal(result3, false);
     });
   });
-  describe('testing getAmountInclusiveByTaxRate', () => {
-    it('should return getAmountInclusiveByTaxRate value accordingly', () => {
-      const result = getAmountInclusiveByTaxRate(100, 0.15);
-      assert.equal(result, roundOffValue(100 * 1.15));
+
+  describe('testing getFlatTaxRate', () => {
+    it('should return getFlatTaxRate value accordingly', () => {
+      const result1 = getFlatTaxRate(null);
+      assert.equal(result1, -1);
+      const result2 = getFlatTaxRate('JP');
+      assert.equal(result2, 0.15);
     });
   });
 });

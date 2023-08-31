@@ -1,13 +1,11 @@
 const express = require('express');
 
 const router = express.Router();
+const { getCountryCode, checkIsFlatTaxRate, getFlatTaxRate } = require('../../util/util');
 const {
-  getCountryCode,
   getTransformedResponseByFlatTaxRate,
   getTransformedResponseFromAvalara,
-  checkIsFlatTaxRate,
-  getFlatTaxRate,
-} = require('../../util/util');
+} = require('../helpers/response-helper');
 const { exampleEstimateTaxResponse } = require('../../util/example');
 
 /**

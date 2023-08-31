@@ -18,5 +18,10 @@ module.exports = {
   AVALARA_PATH: {
     PING: 'utilities/ping',
     CREATE_TRANSICATION: 'transactions/create'
+  },
+  FLAT_RATE: {
+    JP: .15,
+    NZ:.15,
+    AU: .15,
   }
 };

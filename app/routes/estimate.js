@@ -1,7 +1,11 @@
 const express = require('express');
 
 const router = express.Router();
-const { getCountryCode, getCalculatedResponse, getTransformedResponse } = require('../../util/util');
+const { getCountryCode, checkIsFlatTaxRate, getFlatTaxRate } = require('../../util/util');
+const {
+  getTransformedResponseByFlatTaxRate,
+  getTransformedResponseFromAvalara,
+} = require('../helpers/response-helper');
 const { exampleEstimateTaxResponse } = require('../../util/example');
 
 /**
@@ -204,7 +208,18 @@ router.post('/', async (req, res, next) => {
     const countryCode = getCountryCode(storeHashValue);
     console.log('storeHashValue', storeHashValue);
     console.log('countryCode', countryCode);
-    const expectedResponse = getTransformedResponse(req.body.documents, quoteId);
+
+    const isFlatTaxRate = checkIsFlatTaxRate(countryCode);
+    let expectedResponse;
+    if (isFlatTaxRate) {
+      const flatTaxRate = getFlatTaxRate(countryCode);
+      expectedResponse = getTransformedResponseByFlatTaxRate(req.body.documents, quoteId, flatTaxRate);
+    } else {
+      // TODO: Use Avalara to calculate tax
+      expectedResponse = getTransformedResponseFromAvalara(req.body.documents, quoteId);
+    }
+    console.log('expectedResponse', JSON.stringify(expectedResponse));
+
     return res.status(200).send(expectedResponse);
   } catch (err) {
     next(err);

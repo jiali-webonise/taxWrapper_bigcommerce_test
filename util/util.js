@@ -1,5 +1,6 @@
 const { TaxProviderResponseObject } = require('../app/models/TaxProviderResponseObject');
 const { SalesTaxSummary } = require('../app/models/SalesTaxSummary');
+const { FLAT_RATE } = require('../config/constants');
 
 const {
   US_BIGCOMMERCE_STORE_HASH,
@@ -43,6 +44,20 @@ const getCountryCode = (storeHash) => {
   }
 };
 
+const checkIsFlatTaxRate = (countryCode) => {
+  if (!countryCode) return false;
+  const isFlatRate = Object.keys(FLAT_RATE).includes(countryCode);
+  if (isFlatRate) {
+    return true;
+  }
+  return false;
+};
+
+const getFlatTaxRate = (countryCode) => {
+  if (!countryCode) return -1;
+  return FLAT_RATE[countryCode];
+};
+
 const checkNumberIsNaNAndInfinity = (value = 0) => {
   if (typeof value !== 'number') {
     const transformedValue = Number(value);
@@ -69,81 +84,10 @@ const roundOffValue = (value, digits, setInteger = false) => {
   return Number(checkNumberIsNaNAndInfinity(value).toFixed(2));
 };
 
-const getAmountExclusiveByTaxRate = (amountInclusive, taxRate) => {
-  const result = amountInclusive / (1 + taxRate);
-  return roundOffValue(result);
-};
-
-const getAmountInclusiveByTaxRate = (amountExclusive, taxRate) => {
-  const result = amountExclusive * (1 + taxRate);
-  return roundOffValue(result);
-};
-
-/**
- * Calculate some attributes in response
- *
- * @param   {Object}    responseObject        object received from BC Tax Provider API
- */
-const getCalculatedResponse = (responseObject) => {
-  const calculatedPrice = {};
-  calculatedPrice.tax_rate = 0.1;
-
-  if (responseObject.price.tax_inclusive) {
-    calculatedPrice.amount_inclusive = responseObject.price.amount;
-    calculatedPrice.amount_exclusive = getAmountExclusiveByTaxRate(
-      calculatedPrice.amount_inclusive,
-      calculatedPrice.tax_rate,
-    );
-    calculatedPrice.total_tax = roundOffValue(calculatedPrice.amount_inclusive - calculatedPrice.amount_exclusive);
-  } else {
-    calculatedPrice.amount_exclusive = responseObject.price.amount;
-    calculatedPrice.amount_inclusive = getAmountInclusiveByTaxRate(
-      calculatedPrice.amount_exclusive,
-      calculatedPrice.tax_rate,
-    );
-    calculatedPrice.total_tax = roundOffValue(calculatedPrice.amount_inclusive - calculatedPrice.amount_exclusive);
-  }
-  const salesSummary = new SalesTaxSummary({
-    name: 'Tax',
-    rate: calculatedPrice.tax_rate,
-    amount: calculatedPrice.total_tax,
-    taxClass: responseObject.tax_class,
-    id: 'Tax',
-  });
-  const result = new TaxProviderResponseObject({
-    id: responseObject.id,
-    price: calculatedPrice,
-    type: responseObject.type,
-    salesTaxSummary: [salesSummary],
-  });
-  return result;
-};
-
-/**
- * Transform response to meet BC requirement
- *
- * @param   {Object}    documents      documents(cart data) received from BC
- * @param   {String}    quoteId        quoteId received from BC Tax Provider API
- */
-const getTransformedResponse = (documents, quoteId) => {
-  const transformedDocs = documents.map((document) => {
-    const items = document.items;
-    const transformedItems = items.map((item) => {
-      const transformedItem = getCalculatedResponse(item);
-      return transformedItem;
-    });
-    const shipping = getCalculatedResponse(document.shipping);
-    const handling = getCalculatedResponse(document.handling);
-    return { id: document.id, items: transformedItems, shipping: shipping, handling: handling };
-  });
-  return { documents: transformedDocs, id: quoteId };
-};
-
 module.exports = {
   getCountryCode,
-  getCalculatedResponse,
-  getTransformedResponse,
-  getAmountExclusiveByTaxRate,
-  getAmountInclusiveByTaxRate,
   roundOffValue,
+  checkNumberIsNaNAndInfinity,
+  checkIsFlatTaxRate,
+  getFlatTaxRate,
 };

@@ -1,5 +1,6 @@
 const { TaxProviderResponseObject } = require('../app/models/TaxProviderResponseObject');
 const { SalesTaxSummary } = require('../app/models/SalesTaxSummary');
+const { FLAT_RATE } = require('../config/constants');
 
 const {
   US_BIGCOMMERCE_STORE_HASH,
@@ -43,6 +44,20 @@ const getCountryCode = (storeHash) => {
   }
 };
 
+const checkIsFlatTaxRate = (countryCode) => {
+  if (!countryCode) return false;
+  const isFlatRate = Object.keys(FLAT_RATE).includes(countryCode);
+  if (isFlatRate) {
+    return true;
+  }
+  return false;
+};
+
+const getFlatTaxRate = (countryCode) => {
+  if (!countryCode) return false;
+  return FLAT_RATE[countryCode];
+};
+
 const checkNumberIsNaNAndInfinity = (value = 0) => {
   if (typeof value !== 'number') {
     const transformedValue = Number(value);
@@ -82,11 +97,11 @@ const getAmountInclusiveByTaxRate = (amountExclusive, taxRate) => {
 /**
  * Calculate some attributes in response
  *
- * @param   {Object}    responseObject        object received from BC Tax Provider API
+ * @param   {Object}    responseObject   object received from BC Tax Provider API
  */
-const getCalculatedResponse = (responseObject) => {
+const getCalculatedResponseByTaxRate = (responseObject, taxRate) => {
   const calculatedPrice = {};
-  calculatedPrice.tax_rate = 0.1;
+  calculatedPrice.tax_rate = taxRate;
 
   if (responseObject.price.tax_inclusive) {
     calculatedPrice.amount_inclusive = responseObject.price.amount;
@@ -125,15 +140,30 @@ const getCalculatedResponse = (responseObject) => {
  * @param   {Object}    documents      documents(cart data) received from BC
  * @param   {String}    quoteId        quoteId received from BC Tax Provider API
  */
-const getTransformedResponse = (documents, quoteId) => {
+const getTransformedResponseByFlatTaxRate = (documents, quoteId, flatTaxRate) => {
   const transformedDocs = documents.map((document) => {
     const items = document.items;
     const transformedItems = items.map((item) => {
-      const transformedItem = getCalculatedResponse(item);
+      const transformedItem = getCalculatedResponseByTaxRate(item, flatTaxRate);
       return transformedItem;
     });
-    const shipping = getCalculatedResponse(document.shipping);
-    const handling = getCalculatedResponse(document.handling);
+    const shipping = getCalculatedResponseByTaxRate(document.shipping, flatTaxRate);
+    const handling = getCalculatedResponseByTaxRate(document.handling, flatTaxRate);
+    return { id: document.id, items: transformedItems, shipping: shipping, handling: handling };
+  });
+  return { documents: transformedDocs, id: quoteId };
+};
+
+// TODO: Refactor this method with real Avalara data
+const getTransformedResponseFromAvalara = (documents, quoteId, avalaraResponseTaxRate = 0.1) => {
+  const transformedDocs = documents.map((document) => {
+    const items = document.items;
+    const transformedItems = items.map((item) => {
+      const transformedItem = getCalculatedResponseByTaxRate(item, avalaraResponseTaxRate);
+      return transformedItem;
+    });
+    const shipping = getCalculatedResponseByTaxRate(document.shipping, avalaraResponseTaxRate);
+    const handling = getCalculatedResponseByTaxRate(document.handling, avalaraResponseTaxRate);
     return { id: document.id, items: transformedItems, shipping: shipping, handling: handling };
   });
   return { documents: transformedDocs, id: quoteId };
@@ -141,9 +171,12 @@ const getTransformedResponse = (documents, quoteId) => {
 
 module.exports = {
   getCountryCode,
-  getCalculatedResponse,
-  getTransformedResponse,
+  getTransformedResponseByFlatTaxRate,
+  getTransformedResponseFromAvalara,
   getAmountExclusiveByTaxRate,
   getAmountInclusiveByTaxRate,
   roundOffValue,
+  checkNumberIsNaNAndInfinity,
+  checkIsFlatTaxRate,
+  getFlatTaxRate,
 };

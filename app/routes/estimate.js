@@ -215,8 +215,8 @@ router.post('/', async (req, res, next) => {
       const flatTaxRate = getFlatTaxRate(countryCode);
       expectedResponse = getTransformedResponseByFlatTaxRate(req.body.documents, quoteId, flatTaxRate);
     } else {
-      // TODO: Use Avalara to calculate tax
-      expectedResponse = getTransformedResponseFromAvalara(req.body.documents, quoteId);
+      // TODO: transform avalara response to BC response
+      expectedResponse = getTransformedResponseFromAvalara(req.body, storeHashValue, req.body.documents, quoteId);
     }
     console.log('expectedResponse', JSON.stringify(expectedResponse));
 

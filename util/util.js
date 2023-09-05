@@ -83,6 +83,20 @@ const roundOffValue = (value, digits, setInteger = false) => {
   }
   return Number(checkNumberIsNaNAndInfinity(value).toFixed(2));
 };
+const getCompanyCode = (storeHash) => {
+  const market = getCountryCode(storeHash);
+  if (!market) return null;
+  switch (market) {
+    case 'US':
+      return 'NEWAYS';
+    case 'EU':
+      return 'MODEREEUROPEBV';
+    case 'CA':
+      return 'CANADA';
+    default:
+      return null;
+  }
+};
 
 module.exports = {
   getCountryCode,
@@ -90,4 +104,5 @@ module.exports = {
   checkNumberIsNaNAndInfinity,
   checkIsFlatTaxRate,
   getFlatTaxRate,
+  getCompanyCode,
 };

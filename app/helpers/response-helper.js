@@ -1,8 +1,10 @@
 const { TaxProviderResponseObject } = require('../models/TaxProviderResponseObject');
 const { SalesTaxSummary } = require('../models/SalesTaxSummary');
-const { FLAT_RATE } = require('../../config/constants');
+const { FLAT_RATE, AVALARA_PATH } = require('../../config/constants');
 const { getAmountExclusiveByTaxRate, getAmountInclusiveByTaxRate } = require('./tax-calculate-helper');
 const { roundOffValue } = require('../../util/util');
+const { getAvalaraCreateTransactionRequestBody } = require('../../util/avalara');
+const { postAvalaraService } = require('../services/avalara-service');
 
 /**
  * Transform response to meet BC requirement
@@ -24,8 +26,12 @@ const getTransformedResponseByFlatTaxRate = (documents, quoteId, flatTaxRate) =>
   return { documents: transformedDocs, id: quoteId };
 };
 
-// TODO: Refactor this method with real Avalara data
-const getTransformedResponseFromAvalara = (documents, quoteId, avalaraResponseTaxRate = 0.1) => {
+const getTransformedResponseFromAvalara = async (data, storeHash, documents, quoteId, avalaraResponseTaxRate = 0.1) => {
+  const avalaraRequestBody = getAvalaraCreateTransactionRequestBody(data, storeHash);
+  const avalaraResponse = await postAvalaraService({ url: AVALARA_PATH.CREATE_TRANSICATION, body: avalaraRequestBody });
+  console.log('avalaraRequestBody', avalaraRequestBody);
+  console.log('avalaraResponse', avalaraResponse);
+  //TODO: Create response in BC format
   const transformedDocs = documents.map((document) => {
     const items = document.items;
     const transformedItems = items.map((item) => {

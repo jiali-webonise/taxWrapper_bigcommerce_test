@@ -19,18 +19,18 @@ const avalaraInstance = axios.create({
 const getAvalaraService = async ({ url }) => {
   try {
     const res = await avalaraInstance.get(url);
-    return res;
+    return res.data;
   } catch (error) {
-    console.error(error);
+    console.error('error', error);
   }
 };
 
 const postAvalaraService = async ({ url, body }) => {
   try {
     const res = await avalaraInstance.post(url, body);
-    return res;
+    return res.data;
   } catch (error) {
-    console.error(error);
+    console.error('error', error);
   }
 };
 

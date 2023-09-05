@@ -23,5 +23,14 @@ module.exports = {
     JP: .15,
     NZ:.15,
     AU: .15,
+  },
+  COUNTRY_CODE:{
+    US:'US',
+    CA:'CA',
+    AU:'AU',
+    NZ:'NZ',
+    JP:'JP',
+    IN:'IN',
+    EU:'EU'
   }
 };

@@ -37,8 +37,8 @@ const getCountryCode = (storeHash) => {
       return 'EU';
     case WEBONISELAB_STORE_HASH:
       // this is for testing in Webonise sandbox
-      return 'JP';
-    // no defualt
+      return 'US';
+    // no default
     default:
       return null;
   }

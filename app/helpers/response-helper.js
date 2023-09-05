@@ -26,23 +26,27 @@ const getTransformedResponseByFlatTaxRate = (documents, quoteId, flatTaxRate) =>
   return { documents: transformedDocs, id: quoteId };
 };
 
-const getTransformedResponseFromAvalara = async (data, storeHash, documents, quoteId, avalaraResponseTaxRate = 0.1) => {
+const getTransformedResponseFromAvalara = async (data, storeHash, documents, quoteId) => {
   const avalaraRequestBody = getAvalaraCreateTransactionRequestBody(data, storeHash);
   const avalaraResponse = await postAvalaraService({ url: AVALARA_PATH.CREATE_TRANSICATION, body: avalaraRequestBody });
   console.log('avalaraRequestBody', avalaraRequestBody);
   console.log('avalaraResponse', avalaraResponse);
-  //TODO: Create response in BC format
-  const transformedDocs = documents.map((document) => {
-    const items = document.items;
-    const transformedItems = items.map((item) => {
-      const transformedItem = getCalculatedResponseByTaxRate(item, avalaraResponseTaxRate);
-      return transformedItem;
+
+  // Create response in BC format
+  if (avalaraResponse && avalaraResponse.lines) {
+    const transformedDocs = documents.map((document) => {
+      const items = document.items;
+      const transformedItems = items.map((item) => {
+        const transformedItem = getTaxFromAvalaraResponse(item, avalaraResponse?.lines);
+        return transformedItem;
+      });
+      // TODO: Update for shipping rate
+      const shipping = getTaxFromAvalaraResponse(document.shipping, avalaraResponse?.lines);
+      const handling = getTaxFromAvalaraResponse(document.handling, avalaraResponse?.lines);
+      return { id: document.id, items: transformedItems, shipping: shipping, handling: handling };
     });
-    const shipping = getCalculatedResponseByTaxRate(document.shipping, avalaraResponseTaxRate);
-    const handling = getCalculatedResponseByTaxRate(document.handling, avalaraResponseTaxRate);
-    return { id: document.id, items: transformedItems, shipping: shipping, handling: handling };
-  });
-  return { documents: transformedDocs, id: quoteId };
+    return { documents: transformedDocs, id: quoteId };
+  }
 };
 
 /**
@@ -85,8 +89,53 @@ const getCalculatedResponseByTaxRate = (responseObject, taxRate) => {
   return result;
 };
 
+const getTaxFromAvalaraResponse = (item, avalaraResponseLines) => {
+  const calculatedPrice = { tax_rate: 0 };
+  const avalaraItem = avalaraResponseLines.find((el) => el.itemCode === item['item_code']);
+  let taxClassCode = '';
+  let taxAmount = avalaraItem.tax;
+
+  // Currently, hardcode the handling amount to 0 because without it cannot have show correct tax in BC
+  if (item.id.includes('handling')) {
+    calculatedPrice.amount_exclusive = 0;
+    calculatedPrice.total_tax = 0;
+    calculatedPrice.amount_inclusive = 0;
+    taxAmount = 0;
+  } else if (avalaraItem && !item.price.tax_inclusive) {
+    calculatedPrice.amount_exclusive = item.price.amount;
+    calculatedPrice.total_tax = avalaraItem.tax;
+    calculatedPrice.amount_inclusive = calculatedPrice.amount_exclusive + calculatedPrice.total_tax;
+  }
+  // TODO: Handle condition when item.price.tax_inclusive is true if there is
+  // TODO: Handle when avalaraItem is undefined
+
+  if (avalaraItem) {
+    avalaraItem?.details?.forEach((detail) => {
+      calculatedPrice.tax_rate += detail.rate;
+      taxClassCode = detail.country;
+    });
+  }
+  // Can only have one salesTaxSummary and the tax rate is the total tax rate
+  const salesTaxSummary = new SalesTaxSummary({
+    name: 'Tax',
+    rate: calculatedPrice.tax_rate,
+    amount: taxAmount,
+    taxClass: { ...item.tax_class, code: taxClassCode },
+    id: 'Tax',
+  });
+
+  const result = new TaxProviderResponseObject({
+    id: item.id,
+    price: calculatedPrice,
+    type: item.type,
+    salesTaxSummary: [salesTaxSummary],
+  });
+  return result;
+};
+
 module.exports = {
   getTransformedResponseByFlatTaxRate,
   getTransformedResponseFromAvalara,
   getCalculatedResponseByTaxRate,
+  getTaxFromAvalaraResponse,
 };

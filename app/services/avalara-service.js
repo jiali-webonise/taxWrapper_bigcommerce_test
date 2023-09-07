@@ -7,7 +7,7 @@ const { AVALARA_AUTH } = process.env;
  */
 const avalaraInstance = axios.create({
   baseURL: 'https://rest.avatax.com/api/v2/',
-  timeout: 1000,
+  timeout: 7000,
   headers: {
     Accept: 'application/json',
     'Content-Type': 'application/json',

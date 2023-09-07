@@ -211,7 +211,10 @@ router.post('/', async (req, res, next) => {
 
     const isFlatTaxRate = checkIsFlatTaxRate(countryCode);
     let expectedResponse;
-    if (isFlatTaxRate) {
+    // When BC test connection
+    if (quoteId === 'quote-id') {
+      expectedResponse = getTransformedResponseByFlatTaxRate(req.body.documents, quoteId, 0.01);
+    } else if (isFlatTaxRate) {
       const flatTaxRate = getFlatTaxRate(countryCode);
       expectedResponse = getTransformedResponseByFlatTaxRate(req.body.documents, quoteId, flatTaxRate);
     } else {

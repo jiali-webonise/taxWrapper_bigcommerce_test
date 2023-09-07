@@ -1,8 +1,11 @@
 const express = require('express');
 
 const router = express.Router();
-const { getCountryCode } = require('../../util/util');
-const { exampleCommitTaxResponse } = require('../../util/example');
+const { getCountryCode, checkIsFlatTaxRate, getFlatTaxRate } = require('../../util/util');
+const {
+  getTransformedResponseByFlatTaxRate,
+  getTransformedResponseFromAvalara,
+} = require('../helpers/response-helper');
 
 /**
  * @swagger
@@ -97,14 +100,26 @@ const { exampleCommitTaxResponse } = require('../../util/example');
  *
  */
 
-router.post('/', (req, res, next) => {
+router.post('/', async (req, res, next) => {
   try {
     const storeHashValue = req.headers['x-bc-store-hash'];
     const countryCode = getCountryCode(storeHashValue);
+    const quoteId = req.body.id;
+
     console.log('storeHashValue', storeHashValue);
     console.log('countryCode', countryCode);
-    console.log('req', req.body);
-    return res.status(200).send(JSON.stringify(exampleCommitTaxResponse));
+    console.log('commit');
+    const isFlatTaxRate = checkIsFlatTaxRate(countryCode);
+    let expectedResponse;
+    if (isFlatTaxRate) {
+      const flatTaxRate = getFlatTaxRate(countryCode);
+      expectedResponse = getTransformedResponseByFlatTaxRate(req.body.documents, quoteId, flatTaxRate);
+    } else {
+      // TODO: To support avalara and convert avalara response to BC response
+    }
+    console.log('expectedResponse', JSON.stringify(expectedResponse));
+
+    return res.status(200).send(expectedResponse);
   } catch (err) {
     next(err);
   }

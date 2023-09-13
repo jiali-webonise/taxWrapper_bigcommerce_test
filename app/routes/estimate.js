@@ -223,7 +223,6 @@ router.post('/', async (req, res, next) => {
       expectedResponse = await getTransformedResponseFromAvalara(req.body, storeHashValue, req.body.documents, quoteId);
     }
     if (!expectedResponse) {
-      console.log('expectedResponse', expectedResponse);
       return res.status(INTERNAL_SERVER_ERROR.code).send({ error: INTERNAL_SERVER_ERROR.description });
     }
     console.log('expectedResponse', JSON.stringify(expectedResponse));

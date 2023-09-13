@@ -23,6 +23,7 @@ module.exports = {
     JP: .15,
     NZ:.15,
     AU: .15,
+    TEST: 0
   },
   SHIPPING_FLAT_RATE:{
     JP: .1,
@@ -35,5 +36,6 @@ module.exports = {
     JP:'JP',
     IN:'IN',
     EU:'EU'
-  }
+  },
+  TEST_CONNECTION_CODE: 'TEST'
 };

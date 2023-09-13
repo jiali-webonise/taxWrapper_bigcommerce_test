@@ -7,6 +7,7 @@ const {
   getTransformedResponseFromAvalara,
 } = require('../helpers/response-helper');
 const { exampleEstimateTaxResponse } = require('../../util/example');
+const { TEST_CONNECTION_CODE } = require('../../config/constants.js');
 
 /**
  * @swagger
@@ -213,7 +214,7 @@ router.post('/', async (req, res, next) => {
     let expectedResponse;
     // When BC test connection
     if (quoteId === 'quote-id') {
-      expectedResponse = getTransformedResponseByFlatTaxRate(req.body.documents, quoteId, 0.01);
+      expectedResponse = getTransformedResponseByFlatTaxRate(req.body.documents, quoteId, TEST_CONNECTION_CODE);
     } else if (isFlatTaxRate) {
       expectedResponse = getTransformedResponseByFlatTaxRate(req.body.documents, quoteId, countryCode);
     } else {

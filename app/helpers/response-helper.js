@@ -1,6 +1,6 @@
 const { TaxProviderResponseObject } = require('../models/TaxProviderResponseObject');
 const { SalesTaxSummary } = require('../models/SalesTaxSummary');
-const { FLAT_RATE, AVALARA_PATH } = require('../../config/constants');
+const { AVALARA_PATH } = require('../../config/constants');
 const { getAmountExclusiveByTaxRate, getAmountInclusiveByTaxRate } = require('./tax-calculate-helper');
 const { roundOffValue, getFlatTaxRate } = require('../../util/util');
 const { getAvalaraCreateTransactionRequestBody } = require('../../util/avalara');

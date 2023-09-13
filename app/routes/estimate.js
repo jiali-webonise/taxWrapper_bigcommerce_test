@@ -8,7 +8,6 @@ const {
 } = require('../helpers/response-helper');
 const { exampleEstimateTaxResponse } = require('../../util/example');
 const { TEST_CONNECTION_CODE } = require('../../config/constants.js');
-const { InternalError } = require('../services/error-service');
 const { INTERNAL_SERVER_ERROR, OK } = require('../../config/api-config');
 
 /**

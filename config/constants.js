@@ -24,6 +24,9 @@ module.exports = {
     NZ:.15,
     AU: .15,
   },
+  SHIPPING_FLAT_RATE:{
+    JP: .1,
+  },
   COUNTRY_CODE:{
     US:'US',
     CA:'CA',

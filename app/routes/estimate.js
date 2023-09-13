@@ -1,7 +1,7 @@
 const express = require('express');
 
 const router = express.Router();
-const { getCountryCode, checkIsFlatTaxRate, getFlatTaxRate } = require('../../util/util');
+const { getCountryCode, checkIsFlatTaxRate } = require('../../util/util');
 const {
   getTransformedResponseByFlatTaxRate,
   getTransformedResponseFromAvalara,
@@ -215,8 +215,7 @@ router.post('/', async (req, res, next) => {
     if (quoteId === 'quote-id') {
       expectedResponse = getTransformedResponseByFlatTaxRate(req.body.documents, quoteId, 0.01);
     } else if (isFlatTaxRate) {
-      const flatTaxRate = getFlatTaxRate(countryCode);
-      expectedResponse = getTransformedResponseByFlatTaxRate(req.body.documents, quoteId, flatTaxRate);
+      expectedResponse = getTransformedResponseByFlatTaxRate(req.body.documents, quoteId, countryCode);
     } else {
       // Transform avalara response to BC response
       expectedResponse = await getTransformedResponseFromAvalara(req.body, storeHashValue, req.body.documents, quoteId);

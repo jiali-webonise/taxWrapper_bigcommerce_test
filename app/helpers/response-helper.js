@@ -33,7 +33,9 @@ const getTransformedResponseFromAvalara = async (data, storeHash, documents, quo
   const avalaraResponse = await postAvalaraService({ url: AVALARA_PATH.CREATE_TRANSICATION, body: avalaraRequestBody });
   console.log('avalaraRequestBody', avalaraRequestBody);
   console.log('avalaraResponse', avalaraResponse);
-
+  if (!avalaraResponse) {
+    return avalaraResponse;
+  }
   // Create response in BC format
   if (avalaraResponse && avalaraResponse.lines) {
     const transformedDocs = documents.map((document) => {

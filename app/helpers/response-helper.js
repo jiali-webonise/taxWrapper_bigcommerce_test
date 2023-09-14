@@ -26,8 +26,8 @@ const getTransformedResponseByFlatTaxRate = (documents, quoteId, flatTaxRate) =>
   return { documents: transformedDocs, id: quoteId };
 };
 
-const getTransformedResponseFromAvalara = async (data, storeHash, documents, quoteId) => {
-  const avalaraRequestBody = getAvalaraCreateTransactionRequestBody(data, storeHash);
+const getTransformedResponseFromAvalara = async (data, storeHash, documents, quoteId, commit) => {
+  const avalaraRequestBody = getAvalaraCreateTransactionRequestBody(data, storeHash, commit);
   const avalaraResponse = await postAvalaraService({ url: AVALARA_PATH.CREATE_TRANSICATION, body: avalaraRequestBody });
   console.log('avalaraRequestBody', avalaraRequestBody);
   console.log('avalaraResponse', avalaraResponse);

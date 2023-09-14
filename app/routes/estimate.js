@@ -216,7 +216,13 @@ router.post('/', async (req, res, next) => {
       expectedResponse = getTransformedResponseByFlatTaxRate(req.body.documents, quoteId, flatTaxRate);
     } else {
       // Transform avalara response to BC response
-      expectedResponse = await getTransformedResponseFromAvalara(req.body, storeHashValue, req.body.documents, quoteId);
+      expectedResponse = await getTransformedResponseFromAvalara(
+        req.body,
+        storeHashValue,
+        req.body.documents,
+        quoteId,
+        false,
+      );
     }
     console.log('expectedResponse', JSON.stringify(expectedResponse));
 

@@ -32,5 +32,9 @@ module.exports = {
     JP:'JP',
     IN:'IN',
     EU:'EU'
+  },
+  AVALARA_DOCUMENT_TYPE:{
+    SALES_ORDER: 'salesOrder',
+    SALES_INVOICE:'SalesInvoice'
   }
 };

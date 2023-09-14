@@ -1,3 +1,4 @@
+const { AVALARA_DOCUMENT_TYPE } = require('../config/constants');
 const { getCompanyCode } = require('../util/util');
 
 const getLineItems = (items) => {
@@ -34,12 +35,13 @@ const getShippingCostLineItem = (shippingData, itemNumber) => {
   //TODO: Need to confirm taxCode for shipping
 };
 
-const getAvalaraCreateTransactionRequestBody = (data, storeHash) => {
+const getAvalaraCreateTransactionRequestBody = (data, storeHash, commit) => {
   const productItems = getLineItems(data?.documents['0'].items);
   const companyCode = getCompanyCode(storeHash);
-  const shipFromAddress = getAddressForAvalara(data.documents['0'].billing_address);
+  const shipFromAddress = getAddressForAvalara(data.documents['0'].origin_address);
   const shipToAddress = getAddressForAvalara(data.documents['0'].destination_address);
-  const docType = 'SalesOrder';
+  const pointOfOriginAddress = getAddressForAvalara(data.documents['0'].origin_address);
+  const docType = commit ? AVALARA_DOCUMENT_TYPE.SALES_INVOICE : AVALARA_DOCUMENT_TYPE.SALES_ORDER;
   const shippingLineItem = getShippingCostLineItem(data.documents['0'].shipping, productItems.length);
   const lineItems = [...productItems, shippingLineItem];
   const customerCode = data.customer.customer_id;
@@ -49,7 +51,7 @@ const getAvalaraCreateTransactionRequestBody = (data, storeHash) => {
     date: new Date().toISOString()?.slice(0, 10),
     code: data.id,
     customerCode: customerCode,
-    commit: false,
+    commit: commit,
     taxOverride: null,
     currencyCode: data.currency_code,
     description: null,

@@ -220,7 +220,13 @@ router.post('/', async (req, res, next) => {
       expectedResponse = getTransformedResponseByFlatTaxRate(req.body.documents, quoteId, countryCode);
     } else {
       // Transform avalara response to BC response
-      expectedResponse = await getTransformedResponseFromAvalara(req.body, storeHashValue, req.body.documents, quoteId);
+      expectedResponse = await getTransformedResponseFromAvalara(
+        req.body,
+        storeHashValue,
+        req.body.documents,
+        quoteId,
+        false,
+      );
     }
     if (!expectedResponse) {
       return res.status(INTERNAL_SERVER_ERROR.code).send({ error: INTERNAL_SERVER_ERROR.description });

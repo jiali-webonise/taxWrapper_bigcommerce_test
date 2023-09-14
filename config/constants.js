@@ -37,5 +37,9 @@ module.exports = {
     IN:'IN',
     EU:'EU'
   },
-  TEST_CONNECTION_CODE: 'TEST'
+  TEST_CONNECTION_CODE: 'TEST',
+  AVALARA_DOCUMENT_TYPE:{
+    SALES_ORDER: 'salesOrder',
+    SALES_INVOICE:'SalesInvoice'
+  }
 };

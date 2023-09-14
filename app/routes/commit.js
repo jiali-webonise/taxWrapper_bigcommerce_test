@@ -115,7 +115,15 @@ router.post('/', async (req, res, next) => {
       const flatTaxRate = getFlatTaxRate(countryCode);
       expectedResponse = getTransformedResponseByFlatTaxRate(req.body.documents, quoteId, flatTaxRate);
     } else {
-      // TODO: To support avalara and convert avalara response to BC response
+      // TODO: Change commit-final argument to true for production-provided false for testing
+      //NOTE: If you test commit record the transactionId of the document
+      expectedResponse = await getTransformedResponseFromAvalara(
+        req.body,
+        storeHashValue,
+        req.body.documents,
+        quoteId,
+        false,
+      );
     }
     console.log('expectedResponse', JSON.stringify(expectedResponse));
 

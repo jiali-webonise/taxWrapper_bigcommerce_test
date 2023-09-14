@@ -1,6 +1,5 @@
-const { TaxProviderResponseObject } = require('../app/models/TaxProviderResponseObject');
-const { SalesTaxSummary } = require('../app/models/SalesTaxSummary');
-const { FLAT_RATE } = require('../config/constants');
+const { FLAT_RATE, SHIPPING_FLAT_RATE } = require('../config/constants');
+const { InternalError } = require('../app/services/error-service');
 
 const {
   US_BIGCOMMERCE_STORE_HASH,
@@ -54,8 +53,10 @@ const checkIsFlatTaxRate = (countryCode) => {
 };
 
 const getFlatTaxRate = (countryCode) => {
-  if (!countryCode) return -1;
-  return FLAT_RATE[countryCode];
+  if (!countryCode) throw new InternalError();
+  const taxRate = FLAT_RATE[countryCode];
+  const shippingTaxRate = SHIPPING_FLAT_RATE[countryCode] ? SHIPPING_FLAT_RATE[countryCode] : taxRate;
+  return { flatTaxRate: taxRate, shippingTaxRate: shippingTaxRate };
 };
 
 const checkNumberIsNaNAndInfinity = (value = 0) => {

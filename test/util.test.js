@@ -7,6 +7,7 @@ const {
   checkIsFlatTaxRate,
   getFlatTaxRate,
 } = require('../util/util');
+const { InternalError } = require('../app/services/error-service');
 
 describe('utils method test', () => {
   describe('testing getCountryCode', () => {
@@ -87,10 +88,9 @@ describe('utils method test', () => {
 
   describe('testing getFlatTaxRate', () => {
     it('should return getFlatTaxRate value accordingly', () => {
-      const result1 = getFlatTaxRate(null);
-      assert.equal(result1, -1);
+      assert.throws(() => getFlatTaxRate(null), InternalError);
       const result2 = getFlatTaxRate('JP');
-      assert.equal(result2, 0.15);
+      assert.equal(JSON.stringify(result2), JSON.stringify({ flatTaxRate: 0.15, shippingTaxRate: 0.1 }));
     });
   });
 });

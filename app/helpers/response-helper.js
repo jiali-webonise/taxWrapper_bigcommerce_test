@@ -2,7 +2,7 @@ const { TaxProviderResponseObject } = require('../models/TaxProviderResponseObje
 const { SalesTaxSummary } = require('../models/SalesTaxSummary');
 const { FLAT_RATE, AVALARA_PATH } = require('../../config/constants');
 const { getAmountExclusiveByTaxRate, getAmountInclusiveByTaxRate } = require('./tax-calculate-helper');
-const { roundOffValue } = require('../../util/util');
+const { roundOffValue, getFlatTaxRate } = require('../../util/util');
 const { getAvalaraCreateTransactionRequestBody } = require('../../util/avalara');
 const { postAvalaraService } = require('../services/avalara-service');
 
@@ -12,15 +12,17 @@ const { postAvalaraService } = require('../services/avalara-service');
  * @param   {Object}    documents      documents(cart data) received from BC
  * @param   {String}    quoteId        quoteId received from BC Tax Provider API
  */
-const getTransformedResponseByFlatTaxRate = (documents, quoteId, flatTaxRate) => {
+const getTransformedResponseByFlatTaxRate = (documents, quoteId, countryCode) => {
+  const { flatTaxRate, shippingTaxRate } = getFlatTaxRate(countryCode);
   const transformedDocs = documents.map((document) => {
     const items = document.items;
     const transformedItems = items.map((item) => {
       const transformedItem = getCalculatedResponseByTaxRate(item, flatTaxRate);
       return transformedItem;
     });
-    const shipping = getCalculatedResponseByTaxRate(document.shipping, flatTaxRate);
-    const handling = getCalculatedResponseByTaxRate(document.handling, flatTaxRate);
+    const shipping = getCalculatedResponseByTaxRate(document.shipping, shippingTaxRate);
+    // Modere doesn't have Handling fee but BC ask for this attribute
+    const handling = getCalculatedResponseByTaxRate(document.handling, 0);
     return { id: document.id, items: transformedItems, shipping: shipping, handling: handling };
   });
   return { documents: transformedDocs, id: quoteId };

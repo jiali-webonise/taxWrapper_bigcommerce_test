@@ -7,6 +7,8 @@ const {
   getTransformedResponseFromAvalara,
 } = require('../helpers/response-helper');
 const { exampleEstimateTaxResponse } = require('../../util/example');
+const { TEST_CONNECTION_CODE } = require('../../config/constants.js');
+const { INTERNAL_SERVER_ERROR, OK } = require('../../config/api-config');
 
 /**
  * @swagger
@@ -213,7 +215,7 @@ router.post('/', async (req, res, next) => {
     let expectedResponse;
     // When BC test connection
     if (quoteId === 'quote-id') {
-      expectedResponse = getTransformedResponseByFlatTaxRate(req.body.documents, quoteId, 0.01);
+      expectedResponse = getTransformedResponseByFlatTaxRate(req.body.documents, quoteId, TEST_CONNECTION_CODE);
     } else if (isFlatTaxRate) {
       expectedResponse = getTransformedResponseByFlatTaxRate(req.body.documents, quoteId, countryCode);
     } else {
@@ -226,9 +228,12 @@ router.post('/', async (req, res, next) => {
         false,
       );
     }
+    if (!expectedResponse) {
+      return res.status(INTERNAL_SERVER_ERROR.code).send({ error: INTERNAL_SERVER_ERROR.description });
+    }
     console.log('expectedResponse', JSON.stringify(expectedResponse));
 
-    return res.status(200).send(expectedResponse);
+    return res.status(OK.code).send(expectedResponse);
   } catch (err) {
     next(err);
   }

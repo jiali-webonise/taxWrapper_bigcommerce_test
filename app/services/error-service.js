@@ -59,7 +59,7 @@ class NoResultsError extends Error {
 }
 
 /**
- * 400 - Bad Request Error
+ * 500 - Internal Server Error
  *
  * @param {Object}  [args]      Override arguments for Error.
  *                              {status, name, message}
@@ -69,7 +69,7 @@ class InternalError extends Error {
     const { code, name, message } = args || {};
     super();
     this.status = code ? code : 500;
-    this.name = name ? name : 'Internal Error';
+    this.name = name ? name : 'Internal Server Error';
     this.message = message
       ? message
       : 'The server encountered an unexpected condition which prevented it from fulfilling the request.';

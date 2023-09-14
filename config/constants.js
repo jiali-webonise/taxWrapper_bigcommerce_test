@@ -23,6 +23,7 @@ module.exports = {
     JP: .15,
     NZ:.15,
     AU: .15,
+    TEST: 0
   },
   SHIPPING_FLAT_RATE:{
     JP: .1,
@@ -36,6 +37,7 @@ module.exports = {
     IN:'IN',
     EU:'EU'
   },
+  TEST_CONNECTION_CODE: 'TEST',
   AVALARA_DOCUMENT_TYPE:{
     SALES_ORDER: 'salesOrder',
     SALES_INVOICE:'SalesInvoice'

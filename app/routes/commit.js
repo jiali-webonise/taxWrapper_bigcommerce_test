@@ -1,7 +1,7 @@
 const express = require('express');
 
 const router = express.Router();
-const { getCountryCode, checkIsFlatTaxRate, getFlatTaxRate } = require('../../util/util');
+const { getCountryCode, checkIsFlatTaxRate, getFlatTaxRate, checkIsExempted } = require('../../util/util');
 const {
   getTransformedResponseByFlatTaxRate,
   getTransformedResponseFromAvalara,
@@ -109,11 +109,12 @@ router.post('/', async (req, res, next) => {
     console.log('storeHashValue', storeHashValue);
     console.log('countryCode', countryCode);
     console.log('commit');
+    const isExempted = checkIsExempted(req.body);
     const isFlatTaxRate = checkIsFlatTaxRate(countryCode);
     let expectedResponse;
     if (isFlatTaxRate) {
       const flatTaxRate = getFlatTaxRate(countryCode);
-      expectedResponse = getTransformedResponseByFlatTaxRate(req.body.documents, quoteId, flatTaxRate);
+      expectedResponse = getTransformedResponseByFlatTaxRate(req.body.documents, quoteId, flatTaxRate, isExempted);
     } else {
       // TODO: Change commit-final argument to true for production-provided false for testing
       //NOTE: If you test commit record the transactionId of the document

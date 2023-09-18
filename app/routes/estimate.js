@@ -232,7 +232,6 @@ router.post('/', async (req, res, next) => {
         req.body.documents,
         quoteId,
         false,
-        isExempted,
       );
     }
     if (!expectedResponse) {

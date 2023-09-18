@@ -35,7 +35,7 @@ const getShippingCostLineItem = (shippingData, itemNumber) => {
   //TODO: Need to confirm taxCode for shipping
 };
 
-const getAvalaraCreateTransactionRequestBody = (data, storeHash, commit) => {
+const getAvalaraCreateTransactionRequestBody = (data, storeHash, commit, isExempted) => {
   const productItems = getLineItems(data?.documents['0'].items);
   const companyCode = getCompanyCode(storeHash);
   const shipFromAddress = getAddressForAvalara(data.documents['0'].origin_address);
@@ -45,6 +45,7 @@ const getAvalaraCreateTransactionRequestBody = (data, storeHash, commit) => {
   const shippingLineItem = getShippingCostLineItem(data.documents['0'].shipping, productItems.length);
   const lineItems = [...productItems, shippingLineItem];
   const customerCode = data.customer.customer_id;
+  const exemptionNo = isExempted ? data.customer.taxability_code : null;
   const finalRequestBody = {
     type: docType,
     companyCode: companyCode,
@@ -55,7 +56,7 @@ const getAvalaraCreateTransactionRequestBody = (data, storeHash, commit) => {
     taxOverride: null,
     currencyCode: data.currency_code,
     description: null,
-    exemptionNo: null,
+    exemptionNo: exemptionNo,
     taxDate: data.transaction_date,
     lines: lineItems,
     addresses: {

@@ -99,6 +99,13 @@ const getCompanyCode = (storeHash) => {
   }
 };
 
+const checkIsExempted = (data) => {
+  if (Boolean(data.customer?.taxability_code)) {
+    return true;
+  }
+  return false;
+};
+
 module.exports = {
   getCountryCode,
   roundOffValue,
@@ -106,4 +113,5 @@ module.exports = {
   checkIsFlatTaxRate,
   getFlatTaxRate,
   getCompanyCode,
+  checkIsExempted,
 };

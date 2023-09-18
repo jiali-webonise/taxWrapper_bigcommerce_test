@@ -1,7 +1,7 @@
 const express = require('express');
 
 const router = express.Router();
-const { getCountryCode, checkIsFlatTaxRate } = require('../../util/util');
+const { getCountryCode, checkIsFlatTaxRate, checkIsExempted } = require('../../util/util');
 const {
   getTransformedResponseByFlatTaxRate,
   getTransformedResponseFromAvalara,
@@ -212,12 +212,18 @@ router.post('/', async (req, res, next) => {
     console.log('countryCode', countryCode);
 
     const isFlatTaxRate = checkIsFlatTaxRate(countryCode);
+    const isExempted = checkIsExempted(req.body);
     let expectedResponse;
     // When BC test connection
     if (quoteId === 'quote-id') {
-      expectedResponse = getTransformedResponseByFlatTaxRate(req.body.documents, quoteId, TEST_CONNECTION_CODE);
+      expectedResponse = getTransformedResponseByFlatTaxRate(
+        req.body.documents,
+        quoteId,
+        TEST_CONNECTION_CODE,
+        isExempted,
+      );
     } else if (isFlatTaxRate) {
-      expectedResponse = getTransformedResponseByFlatTaxRate(req.body.documents, quoteId, countryCode);
+      expectedResponse = getTransformedResponseByFlatTaxRate(req.body.documents, quoteId, countryCode, isExempted);
     } else {
       // Transform avalara response to BC response
       expectedResponse = await getTransformedResponseFromAvalara(

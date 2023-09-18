@@ -12,15 +12,15 @@ const { postAvalaraService } = require('../services/avalara-service');
  * @param   {Object}    documents      documents(cart data) received from BC
  * @param   {String}    quoteId        quoteId received from BC Tax Provider API
  */
-const getTransformedResponseByFlatTaxRate = (documents, quoteId, countryCode) => {
+const getTransformedResponseByFlatTaxRate = (documents, quoteId, countryCode, isExempted) => {
   const { flatTaxRate, shippingTaxRate } = getFlatTaxRate(countryCode);
   const transformedDocs = documents.map((document) => {
     const items = document.items;
     const transformedItems = items.map((item) => {
-      const transformedItem = getCalculatedResponseByTaxRate(item, flatTaxRate);
+      const transformedItem = getCalculatedResponseByTaxRate(item, flatTaxRate, isExempted);
       return transformedItem;
     });
-    const shipping = getCalculatedResponseByTaxRate(document.shipping, shippingTaxRate);
+    const shipping = getCalculatedResponseByTaxRate(document.shipping, shippingTaxRate, isExempted);
     // Modere doesn't have Handling fee but BC ask for this attribute
     const handling = getCalculatedResponseByTaxRate(document.handling, 0);
     return { id: document.id, items: transformedItems, shipping: shipping, handling: handling };
@@ -61,24 +61,32 @@ const getTransformedResponseFromAvalara = async (data, storeHash, documents, quo
  *
  * @param   {Object}    responseObject   object received from BC Tax Provider API
  */
-const getCalculatedResponseByTaxRate = (responseObject, taxRate) => {
+const getCalculatedResponseByTaxRate = (responseObject, taxRate, isExempted) => {
   const calculatedPrice = {};
   calculatedPrice.tax_rate = taxRate;
-
-  if (responseObject.price.tax_inclusive) {
-    calculatedPrice.amount_inclusive = responseObject.price.amount;
-    calculatedPrice.amount_exclusive = getAmountExclusiveByTaxRate(
-      calculatedPrice.amount_inclusive,
-      calculatedPrice.tax_rate,
-    );
-    calculatedPrice.total_tax = roundOffValue(calculatedPrice.amount_inclusive - calculatedPrice.amount_exclusive);
-  } else {
-    calculatedPrice.amount_exclusive = responseObject.price.amount;
-    calculatedPrice.amount_inclusive = getAmountInclusiveByTaxRate(
-      calculatedPrice.amount_exclusive,
-      calculatedPrice.tax_rate,
-    );
-    calculatedPrice.total_tax = roundOffValue(calculatedPrice.amount_inclusive - calculatedPrice.amount_exclusive);
+  switch (isExempted) {
+    case true:
+      calculatedPrice.amount_exclusive = responseObject.price.amount;
+      calculatedPrice.amount_inclusive = responseObject.price.amount;
+      calculatedPrice.tax_rate = taxRate;
+      calculatedPrice.total_tax = 0;
+      break;
+    default:
+      if (responseObject.price.tax_inclusive) {
+        calculatedPrice.amount_inclusive = responseObject.price.amount;
+        calculatedPrice.amount_exclusive = getAmountExclusiveByTaxRate(
+          calculatedPrice.amount_inclusive,
+          calculatedPrice.tax_rate,
+        );
+        calculatedPrice.total_tax = roundOffValue(calculatedPrice.amount_inclusive - calculatedPrice.amount_exclusive);
+      } else {
+        calculatedPrice.amount_exclusive = responseObject.price.amount;
+        calculatedPrice.amount_inclusive = getAmountInclusiveByTaxRate(
+          calculatedPrice.amount_exclusive,
+          calculatedPrice.tax_rate,
+        );
+        calculatedPrice.total_tax = roundOffValue(calculatedPrice.amount_inclusive - calculatedPrice.amount_exclusive);
+      }
   }
   const salesSummary = new SalesTaxSummary({
     name: 'Tax',

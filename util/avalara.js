@@ -45,6 +45,7 @@ const getAvalaraCreateTransactionRequestBody = (data, storeHash, commit) => {
   const shippingLineItem = getShippingCostLineItem(data.documents['0'].shipping, productItems.length);
   const lineItems = [...productItems, shippingLineItem];
   const customerCode = data.customer.customer_id;
+  const exemptionNo = data.customer.taxability_code ? data.customer.taxability_code : null;
   const finalRequestBody = {
     type: docType,
     companyCode: companyCode,
@@ -55,7 +56,7 @@ const getAvalaraCreateTransactionRequestBody = (data, storeHash, commit) => {
     taxOverride: null,
     currencyCode: data.currency_code,
     description: null,
-    exemptionNo: null,
+    exemptionNo: exemptionNo,
     taxDate: data.transaction_date,
     lines: lineItems,
     addresses: {

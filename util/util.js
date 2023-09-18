@@ -100,7 +100,7 @@ const getCompanyCode = (storeHash) => {
 };
 
 const checkIsExempted = (data) => {
-  if (data.customer.taxability_code) {
+  if (Boolean(data.customer?.taxability_code)) {
     return true;
   }
   return false;

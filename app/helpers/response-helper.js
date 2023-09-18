@@ -45,6 +45,9 @@ const getTransformedResponseFromAvalara = async (data, storeHash, documents, quo
       const handling = getTaxFromAvalaraResponse(document.handling, avalaraResponse?.lines);
       return { id: document.id, items: transformedItems, shipping: shipping, handling: handling };
     });
+    if (commit) {
+      return { documents: transformedDocs, id: quoteId, external_id: avalaraResponse?.id };
+    }
     return { documents: transformedDocs, id: quoteId };
   }
 };

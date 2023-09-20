@@ -9,6 +9,7 @@ const {
 const { exampleEstimateTaxResponse } = require('../../util/example');
 const { TEST_CONNECTION_CODE } = require('../../config/constants.js');
 const { INTERNAL_SERVER_ERROR, OK } = require('../../config/api-config');
+const { getProductsBySKUs } = require('../services/category-api');
 
 /**
  * @swagger
@@ -222,17 +223,43 @@ router.post('/', async (req, res, next) => {
         TEST_CONNECTION_CODE,
         isExempted,
       );
-    } else if (isFlatTaxRate) {
-      expectedResponse = getTransformedResponseByFlatTaxRate(req.body.documents, quoteId, countryCode, isExempted);
     } else {
-      // Transform avalara response to BC response
-      expectedResponse = await getTransformedResponseFromAvalara(
-        req.body,
-        storeHashValue,
-        req.body.documents,
-        quoteId,
-        false,
-      );
+      // check if has bundles and get bundle items
+      let bundleProducts = [];
+      req.body.documents.forEach((document) => {
+        const bundleItems = document?.items?.filter((item) =>
+          item?.tax_properties?.find((el) => el.code === 'bundle' && el.value === 'true'),
+        );
+        if (bundleItems) {
+          bundleProducts = [...bundleProducts, ...bundleItems];
+        }
+      });
+      // Call BC products API to get product info
+      const bundleProductSKUs = bundleProducts.map((el) => el.item_code);
+
+      const bundleProductInfos = await getProductsBySKUs({
+        store_hash: storeHashValue,
+        queryParams: bundleProductSKUs,
+      });
+      console.log('bundleProductInfos', JSON.stringify(bundleProductInfos.data));
+
+      // Get child items
+      // Update item price (weight percentage)
+      // Update documents
+
+      if (isFlatTaxRate) {
+        expectedResponse = getTransformedResponseByFlatTaxRate(req.body.documents, quoteId, countryCode, isExempted);
+      } else {
+        // Transform avalara response to BC response
+        expectedResponse = await getTransformedResponseFromAvalara(
+          req.body,
+          storeHashValue,
+          req.body.documents,
+          quoteId,
+          false,
+        );
+      }
+      // Update meta field
     }
     if (!expectedResponse) {
       return res.status(INTERNAL_SERVER_ERROR.code).send({ error: INTERNAL_SERVER_ERROR.description });

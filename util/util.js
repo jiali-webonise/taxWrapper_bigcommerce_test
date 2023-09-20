@@ -10,6 +10,14 @@ const {
   IN_BIGCOMMERCE_STORE_HASH,
   EU_BIGCOMMERCE_STORE_HASH,
   WEBONISELAB_STORE_HASH,
+  US_BIGCOMMERCE_ACCESS_TOKEN,
+  CA_BIGCOMMERCE_ACCESS_TOKEN,
+  AU_BIGCOMMERCE_ACCESS_TOKEN,
+  NZ_BIGCOMMERCE_ACCESS_TOKEN,
+  JP_BIGCOMMERCE_ACCESS_TOKEN,
+  EU_BIGCOMMERCE_ACCESS_TOKEN,
+  IN_BIGCOMMERCE_ACCESS_TOKEN,
+  WEBONISELAB_ACCESS_TOKEN,
 } = process.env;
 
 /**
@@ -37,6 +45,32 @@ const getCountryCode = (storeHash) => {
     case WEBONISELAB_STORE_HASH:
       // this is for testing in Webonise sandbox
       return 'US';
+    // no default
+    default:
+      return null;
+  }
+};
+
+const getTokenByStoreHash = (storeHash) => {
+  if (!storeHash) return null;
+  switch (storeHash) {
+    case US_BIGCOMMERCE_STORE_HASH:
+      return US_BIGCOMMERCE_ACCESS_TOKEN;
+    case CA_BIGCOMMERCE_STORE_HASH:
+      return CA_BIGCOMMERCE_ACCESS_TOKEN;
+    case AU_BIGCOMMERCE_STORE_HASH:
+      return AU_BIGCOMMERCE_ACCESS_TOKEN;
+    case NZ_BIGCOMMERCE_STORE_HASH:
+      return NZ_BIGCOMMERCE_ACCESS_TOKEN;
+    case JP_BIGCOMMERCE_STORE_HASH:
+      return JP_BIGCOMMERCE_ACCESS_TOKEN;
+    case IN_BIGCOMMERCE_STORE_HASH:
+      return IN_BIGCOMMERCE_ACCESS_TOKEN;
+    case EU_BIGCOMMERCE_STORE_HASH:
+      return EU_BIGCOMMERCE_ACCESS_TOKEN;
+    case WEBONISELAB_STORE_HASH:
+      // this is for testing in Webonise sandbox
+      return WEBONISELAB_ACCESS_TOKEN;
     // no default
     default:
       return null;
@@ -114,4 +148,5 @@ module.exports = {
   getFlatTaxRate,
   getCompanyCode,
   checkIsExempted,
+  getTokenByStoreHash,
 };

@@ -1,3 +1,4 @@
+const {SWAGGER_URL} = process.env
 const options = {
   definition: {
     openapi: '3.1.0',
@@ -18,7 +19,7 @@ const options = {
     servers: [
       {
         // url: "http://localhost:3000/api",
-        url: 'https://taxwrapper.ngrok.app/api',
+        url: SWAGGER_URL,
       },
     ],
   },

@@ -14,6 +14,7 @@ module.exports = {
     COMMIT: 'doc/commit',
     ADJUST: 'doc/adjust',
     VOID: 'doc/void',
+    SHIPPING_TAX: 'shipping-tax'
   },
   AVALARA_PATH: {
     PING: 'utilities/ping',
@@ -24,9 +25,6 @@ module.exports = {
     NZ:.15,
     AU: .15,
     TEST: 0
-  },
-  SHIPPING_FLAT_RATE:{
-    JP: .1,
   },
   COUNTRY_CODE:{
     US:'US',
@@ -41,5 +39,11 @@ module.exports = {
   AVALARA_DOCUMENT_TYPE:{
     SALES_ORDER: 'salesOrder',
     SALES_INVOICE:'SalesInvoice'
+  },
+  REGION_NAME:{
+    JP:'Japan',
+    NZ:'New Zealand',
+    AU:'Australia',
+    IN: 'India'
   }
 };

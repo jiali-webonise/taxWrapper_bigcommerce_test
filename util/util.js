@@ -1,5 +1,6 @@
-const { FLAT_RATE, SHIPPING_FLAT_RATE } = require('../config/constants');
+const { FLAT_RATE } = require('../config/constants');
 const { InternalError } = require('../app/services/error-service');
+const { SHIPPING_FLAT_RATE } = require('../config/shipping-rates');
 
 const {
   US_BIGCOMMERCE_STORE_HASH,

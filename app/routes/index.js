@@ -10,6 +10,7 @@ const estimateRoutes = require('./estimate.js');
 const commitRoutes = require('./commit.js');
 const adjustRoutes = require('./adjust.js');
 const voidRoutes = require('./void.js');
+const shippingTaxRoutes = require('./shipping-tax.js');
 
 const options = require('../../config/swagger-config.js');
 const { isBCTaxProviderAuthenticated } = require('../middlewares/taxProviderAuth.js');
@@ -32,7 +33,7 @@ module.exports = function (app) {
   app.use(`${API_BASE_PATH}/${RESOURCE.VOID}`, isBCTaxProviderAuthenticated, voidRoutes);
 
   app.use(`${API_BASE_PATH}/${RESOURCE.USERS}`, userRoutes);
-
+  app.use(`${API_BASE_PATH}/${RESOURCE.SHIPPING_TAX}`, isBCTaxProviderAuthenticated, shippingTaxRoutes);
   // Swagger Doc URL
   const specs = swaggerJsdoc(options);
   app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(specs, { explorer: true }));

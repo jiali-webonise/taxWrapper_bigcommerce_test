@@ -2,7 +2,6 @@ const swaggerJsdoc = require('swagger-jsdoc');
 const swaggerUi = require('swagger-ui-express');
 const { API_BASE_PATH, RESOURCE } = require('../../config/constants.js');
 const winston = require('../../config/winston-config.js');
-const userRoutes = require('./users.js');
 const authRoutes = require('./auth.js');
 const loadRoutes = require('./load.js');
 const uninstallRoutes = require('./uninstall.js');
@@ -32,7 +31,6 @@ module.exports = function (app) {
   app.use(`${API_BASE_PATH}/${RESOURCE.ADJUST}`, isBCTaxProviderAuthenticated, adjustRoutes);
   app.use(`${API_BASE_PATH}/${RESOURCE.VOID}`, isBCTaxProviderAuthenticated, voidRoutes);
 
-  app.use(`${API_BASE_PATH}/${RESOURCE.USERS}`, userRoutes);
   app.use(`${API_BASE_PATH}/${RESOURCE.SHIPPING_TAX}`, isBCTaxProviderAuthenticated, shippingTaxRoutes);
   // Swagger Doc URL
   const specs = swaggerJsdoc(options);

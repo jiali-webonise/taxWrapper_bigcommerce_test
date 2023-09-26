@@ -1,10 +1,7 @@
 const axios = require('axios');
 
 const { AVALARA_AUTH } = process.env;
-/**
- * URL is https://api.bigcommerce.com/stores/${store_hash}/v3/tax/providers/${provider_id}/connection
- * bcConnectionClient instance is used for Tax Provider Connection
- */
+
 const avalaraInstance = axios.create({
   baseURL: 'https://rest.avatax.com/api/v2/',
   timeout: 10000,

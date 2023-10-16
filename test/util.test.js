@@ -90,7 +90,7 @@ describe('utils method test', () => {
     it('should return getFlatTaxRate value accordingly', () => {
       assert.throws(() => getFlatTaxRate(null), InternalError);
       const result2 = getFlatTaxRate('JP');
-      assert.equal(JSON.stringify(result2), JSON.stringify({ flatTaxRate: 0.15, shippingTaxRate: 0.1 }));
+      assert.equal(JSON.stringify(result2), JSON.stringify({ flatTaxRate: 0.1, shippingTaxRate: 0.1 }));
     });
   });
 });

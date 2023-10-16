@@ -20,9 +20,10 @@ module.exports = {
     CREATE_TRANSICATION: 'transactions/create'
   },
   FLAT_RATE: {
-    JP: .15,
+    JP: .10,
     NZ:.15,
-    AU: .15,
+    AU: .10,
+    IN: .18,
     TEST: 0
   },
   COUNTRY_CODE:{

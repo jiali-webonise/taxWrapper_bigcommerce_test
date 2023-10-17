@@ -1,21 +1,66 @@
 {
-  "name": "taxwrapper",
+  "name": "tax_wrapper",
   "version": "1.0.0",
-  "description": "",
+  "description": "Codebase for Big Commerce Single click Tax application",
   "main": "index.js",
-  "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
-    "start": "nodemon app/server.js"
+  "private": true,
+  "engines": {
+    "node": ">= 16.0.0",
+    "npm": ">= 8.15.1"
   },
-  "author": "Jiali",
+  "scripts": {
+    "start": "nodemon app/server.js",
+    "test-watch": "mocha --watch",
+    "test": "mocha",
+    "format:check": "prettier --check .",
+    "format:write": "prettier --write .",
+    "lint:check": "eslint .",
+    "lint:fix": "eslint --fix . --ext .js"
+  },
+  "lint-staged": {
+    "**/*.{js}": [
+      "npm test",
+      "eslint --fix",
+      "git add"
+    ]
+  },
+  "repository": {
+    "type": "git",
+    "url": ""
+  },
+  "author": {
+    "name": "Webonise Lab",
+    "url": "https://www.webonise.com/",
+    "email": "letstalk@webonise.com"
+  },
   "license": "ISC",
   "dependencies": {
+    "axios": "^1.4.0",
     "body-parser": "^1.20.2",
+    "compression": "^1.7.4",
+    "cookie-parser": "^1.4.6",
     "cors": "^2.8.5",
     "dotenv": "^16.3.1",
-    "express": "^4.18.2"
+    "express": "^4.18.2",
+    "helmet": "^7.0.0",
+    "node-bigcommerce": "^4.1.0",
+    "winston": "^3.10.0",
+    "winston-daily-rotate-file": "^4.7.1"
   },
   "devDependencies": {
-    "nodemon": "^3.0.1"
-  }
+    "chai": "^4.3.7",
+    "eslint": "^8.47.0",
+    "eslint-config-prettier": "^9.0.0",
+    "eslint-plugin-prettier": "^5.0.0",
+    "mocha": "^10.2.0",
+    "nodemon": "^3.0.1",
+    "pre-commit": "^1.2.2",
+    "prettier": "^3.0.2",
+    "server-timing-header": "^1.9.7",
+    "swagger-jsdoc": "^6.2.8",
+    "swagger-ui-express": "^5.0.0"
+  },
+  "pre-commit": [
+    "test"
+  ]
 }

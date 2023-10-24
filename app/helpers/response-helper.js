@@ -1,10 +1,11 @@
 const { TaxProviderResponseObject } = require('../models/TaxProviderResponseObject');
 const { SalesTaxSummary } = require('../models/SalesTaxSummary');
-const { AVALARA_PATH } = require('../../config/constants');
+const { AVALARA_PATH, COUNTRY_CODE } = require('../../config/constants');
 const { getAmountExclusiveByTaxRate, getAmountInclusiveByTaxRate } = require('./tax-calculate-helper');
 const { roundOffValue, getFlatTaxRate } = require('../../util/util');
-const { getAvalaraCreateTransactionRequestBody } = require('../../util/avalara');
+const { getAvalaraCreateTransactionRequestBody, getBundleChildrenLineItems } = require('../../util/avalara');
 const { postAvalaraService } = require('../services/avalara-service');
+const { BUNDLE, BASIC, PRODUCT_TYPE, CALCULATE_TAX_ON_KIT_DETAIL } = require('../../util/tax-properties');
 
 /**
  * Transform response to meet BC requirement
@@ -28,8 +29,8 @@ const getTransformedResponseByFlatTaxRate = (documents, quoteId, countryCode, is
   return { documents: transformedDocs, id: quoteId };
 };
 
-const getTransformedResponseFromAvalara = async (data, storeHash, documents, quoteId, commit) => {
-  const avalaraRequestBody = getAvalaraCreateTransactionRequestBody(data, storeHash, commit);
+const getTransformedResponseFromAvalara = async (data, storeHash, documents, quoteId, commit, countryCode) => {
+  const avalaraRequestBody = getAvalaraCreateTransactionRequestBody(data, storeHash, commit, countryCode);
   const avalaraResponse = await postAvalaraService({ url: AVALARA_PATH.CREATE_TRANSICATION, body: avalaraRequestBody });
   console.log('avalaraRequestBody', avalaraRequestBody);
   console.log('avalaraResponse', avalaraResponse);
@@ -40,14 +41,50 @@ const getTransformedResponseFromAvalara = async (data, storeHash, documents, quo
   if (avalaraResponse && avalaraResponse.lines) {
     const transformedDocs = documents.map((document) => {
       const items = document.items;
-      const transformedItems = items.map((item) => {
-        const transformedItem = getTaxFromAvalaraResponse(item, avalaraResponse?.lines);
-        return transformedItem;
-      });
+      const transformedItems = items
+        ?.map((item) => {
+          let transformedItem;
+          if (item?.tax_properties?.length > 0) {
+            const taxProperties = item.tax_properties;
+            const productType = taxProperties?.find((property) => property.code === PRODUCT_TYPE)?.value;
+            const isBundle = taxProperties?.find(
+              (property) => property.code === CALCULATE_TAX_ON_KIT_DETAIL && property.value === 'true',
+            )?.value;
+
+            if (productType === BASIC && !isBundle) {
+              transformedItem = getTaxFromAvalaraResponse(item, avalaraResponse?.lines);
+            } else if (productType === BUNDLE && isBundle) {
+              // bundle item
+              const { childrenLineItems } = getBundleChildrenLineItems({
+                taxProperties: taxProperties,
+                countryCode,
+                indexNum: 0,
+                includeParentPrice: true,
+              });
+              // merge bundle children items into one
+              transformedItem = getParentTaxFromAvalaraResponse(
+                item,
+                childrenLineItems,
+                avalaraResponse?.lines,
+                countryCode,
+              );
+            }
+          } else {
+            transformedItem = getTaxFromAvalaraResponse(item, avalaraResponse?.lines);
+          }
+
+          return transformedItem;
+        })
+        ?.filter((item) => item !== undefined && item !== null);
       // TODO: Update for shipping rate
       const shipping = getTaxFromAvalaraResponse(document.shipping, avalaraResponse?.lines);
       const handling = getTaxFromAvalaraResponse(document.handling, avalaraResponse?.lines);
-      return { id: document.id, items: transformedItems, shipping: shipping, handling: handling };
+      return {
+        id: document.id,
+        items: transformedItems,
+        shipping: shipping,
+        handling: handling,
+      };
     });
     if (commit) {
       return { documents: transformedDocs, id: quoteId, external_id: avalaraResponse?.id };
@@ -120,6 +157,10 @@ const getTaxFromAvalaraResponse = (item, avalaraResponseLines) => {
     calculatedPrice.amount_exclusive = item.price.amount;
     calculatedPrice.total_tax = avalaraItem.tax;
     calculatedPrice.amount_inclusive = calculatedPrice.amount_exclusive + calculatedPrice.total_tax;
+  } else if (avalaraItem && item.price.tax_inclusive) {
+    calculatedPrice.amount_exclusive = calculatedPrice.amount_inclusive - calculatedPrice.total_tax;
+    calculatedPrice.total_tax = avalaraItem.tax;
+    calculatedPrice.amount_inclusive = item.price.amount;
   }
   // TODO: Handle condition when item.price.tax_inclusive is true if there is
   // TODO: Handle when avalaraItem is undefined
@@ -148,9 +189,61 @@ const getTaxFromAvalaraResponse = (item, avalaraResponseLines) => {
   return result;
 };
 
+const getParentTaxFromAvalaraResponse = (item, childrenLineItems, avalaraResponseLines, countryCode) => {
+  const calculatedPrice = { tax_rate: 0, amount_exclusive: 0, total_tax: 0, amount_inclusive: 0 };
+  let taxClassCode = '';
+  let taxAmount = 0;
+  let details;
+  let parentPrice;
+  const isUSOrCA =
+    countryCode?.localeCompare(COUNTRY_CODE.US, 'en', { sensitivity: 'base' }) === 0 ||
+    countryCode?.localeCompare(COUNTRY_CODE.CA, 'en', { sensitivity: 'base' }) === 0;
+  const isEU = countryCode?.localeCompare(COUNTRY_CODE.EU) === 0;
+  childrenLineItems?.forEach((child) => {
+    const avalaraItem = avalaraResponseLines.find((el) => el.itemCode === child.itemCode);
+    if (avalaraItem) {
+      details = avalaraItem?.details;
+    }
+    parentPrice = Number(child?.parentPrice);
+    taxAmount += avalaraItem.tax;
+  });
+  calculatedPrice.total_tax = taxAmount;
+  if (isUSOrCA) {
+    calculatedPrice.amount_exclusive = parentPrice;
+    calculatedPrice.amount_inclusive = parentPrice + taxAmount;
+  } else if (isEU) {
+    calculatedPrice.amount_inclusive = parentPrice;
+    calculatedPrice.amount_exclusive = parentPrice - taxAmount;
+  }
+
+  details?.forEach((detail) => {
+    calculatedPrice.tax_rate += detail.rate;
+    taxClassCode = detail.country;
+  });
+
+  // Can only have one salesTaxSummary and the tax rate is the total tax rate
+  const salesTaxSummary = new SalesTaxSummary({
+    name: 'Tax',
+    rate: calculatedPrice.tax_rate,
+    amount: taxAmount,
+    taxClass: { ...item.tax_class, code: taxClassCode },
+    id: 'Tax',
+  });
+
+  const result = new TaxProviderResponseObject({
+    id: item.id,
+    price: calculatedPrice,
+    type: item.type,
+    salesTaxSummary: [salesTaxSummary],
+  });
+
+  return result;
+};
+
 module.exports = {
   getTransformedResponseByFlatTaxRate,
   getTransformedResponseFromAvalara,
   getCalculatedResponseByTaxRate,
   getTaxFromAvalaraResponse,
+  getParentTaxFromAvalaraResponse,
 };

@@ -1,6 +1,7 @@
-const { FLAT_RATE } = require('../config/constants');
+const { FLAT_RATE, COUNTRY_CODE } = require('../config/constants');
 const { InternalError } = require('../app/services/error-service');
 const { SHIPPING_FLAT_RATE } = require('../config/shipping-rates');
+const { CALCULATE_TAX_ON_KIT_DETAIL, PRODUCT_TYPE } = require('./tax-properties');
 
 const {
   US_BIGCOMMERCE_STORE_HASH,
@@ -107,6 +108,86 @@ const checkIsExempted = (data) => {
   return false;
 };
 
+const getCurrencyAndCountryByTaxProperty = (taxProperty) => {
+  let itemCountry, itemCurrency;
+  const codes = taxProperty.split('-');
+  if (codes?.length === 4) {
+    itemCountry = codes[1];
+    itemCurrency = codes[2];
+  } else if (codes?.length === 3) {
+    itemCurrency = codes[1];
+  } else {
+    return { country: null, currency: null };
+  }
+
+  return { country: itemCountry, currency: itemCurrency };
+};
+
+/**
+ * check if country and currency are consistent
+ *
+ * @param {Array} taxProperties
+ * @param {String} countryCode
+ * @param {String} currencyCode
+ * @returns {boolean}
+ */
+const checkCountryOrCurrencyIsConsistent = (taxProperties, countryCode, currencyCode) => {
+  const filteredTaxProperties = taxProperties?.filter(
+    (property) =>
+      property.code !== CALCULATE_TAX_ON_KIT_DETAIL &&
+      property.code !== PRODUCT_TYPE &&
+      !String(property.code)?.startsWith('product'),
+  );
+
+  return filteredTaxProperties.every((property) => {
+    const { country, currency } = getCurrencyAndCountryByTaxProperty(property?.code);
+
+    if (
+      country?.localeCompare(COUNTRY_CODE[countryCode], 'en', { sensitivity: 'base' }) === 0 ||
+      currency?.localeCompare(currencyCode, 'en', { sensitivity: 'base' }) === 0
+    ) {
+      return true;
+    }
+    console.error(
+      `error: country or currency not match: countryCode is ${countryCode} but get ${country},currencyCode is ${currencyCode} but get ${currency}`,
+    );
+    // TODO: handle error
+
+    return false;
+  });
+};
+
+/**
+ * Construct child product from tax properties
+ * If child need more attributes such as currency, country, pricetype, it can be added here
+ *
+ * @param {object} param0
+ * @returns
+ */
+const getChildProduct = ({ childPropertyCode, index, percentage, price, quantity, includeParentPrice }) => {
+  const properties = childPropertyCode.split('|');
+  const child = {};
+  if (properties?.length === 5) {
+    child.number = index;
+    child.quantity = quantity;
+    child.amount = percentage * price;
+    child.itemCode = properties[1];
+    child.taxCode = properties[1];
+  } else if (properties?.length === 4) {
+    child.number = index;
+    child.quantity = quantity;
+    child.amount = Number(percentage) * 0.01 * Number(price);
+    child.itemCode = properties[1];
+    child.taxCode = properties[1];
+  } else {
+    return { childLine: null, index: index };
+  }
+  if (includeParentPrice) {
+    child.parentPrice = price;
+  }
+  return { childLine: child, index: index + 1 };
+};
+
 module.exports = {
   getCountryCode,
   roundOffValue,
@@ -115,4 +196,7 @@ module.exports = {
   getFlatTaxRate,
   getCompanyCode,
   checkIsExempted,
+  getCurrencyAndCountryByTaxProperty,
+  checkCountryOrCurrencyIsConsistent,
+  getChildProduct,
 };

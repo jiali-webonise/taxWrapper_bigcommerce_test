@@ -204,12 +204,12 @@ const { INTERNAL_SERVER_ERROR, OK } = require('../../config/api-config');
  */
 
 router.post('/', async (req, res, next) => {
+  let countryCode;
   try {
     const quoteId = req.body.id;
     const storeHashValue = req.headers['x-bc-store-hash'];
-    const countryCode = getCountryCode(storeHashValue);
+    countryCode = getCountryCode(storeHashValue);
     console.log('storeHashValue', storeHashValue);
-    console.log('countryCode', countryCode);
 
     const isFlatTaxRate = checkIsFlatTaxRate(countryCode);
     const isExempted = checkIsExempted(req.body);
@@ -232,6 +232,7 @@ router.post('/', async (req, res, next) => {
         req.body.documents,
         quoteId,
         false,
+        countryCode,
       );
     }
     if (!expectedResponse) {

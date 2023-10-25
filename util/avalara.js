@@ -40,39 +40,9 @@ const getShippingCostLineItem = (shippingData, itemNumber) => {
 
 const getAvalaraCreateTransactionRequestBody = (data, storeHash, commit, countryCode) => {
   const currencyCode = data.currency_code;
-  // Get normal and bundle items
   const items = data?.documents.flatMap((doc) => doc.items);
 
-  const normalItems = [];
-  const bundleItems = [];
-  const serviceTaxAppliedItems = [];
-
-  // Get normal items and bundle items
-  items?.forEach((item) => {
-    if (item?.tax_properties?.length > 0) {
-      const taxProperties = item.tax_properties;
-      const productType = taxProperties?.find((property) => property.code === PRODUCT_TYPE)?.value;
-      const isBundle = taxProperties?.find(
-        (property) => property.code === CALCULATE_TAX_ON_KIT_DETAIL && property.value === 'true',
-      )?.value;
-      const serviceTaxApplied = taxProperties?.find(
-        (property) => property.code?.includes(SERVICE_TAX_APPLIED) && property.value === 'true',
-      );
-      if (productType === BASIC && !isBundle) {
-        normalItems.push(item);
-      }
-      if (productType === BUNDLE && isBundle) {
-        bundleItems.push(item);
-      }
-      // TODO: handle serviceTaxApplied items
-      if (countryCode === COUNTRY_CODE.EU && serviceTaxApplied) {
-        serviceTaxAppliedItems.push(item);
-      }
-    } else {
-      normalItems.push(item);
-    }
-  });
-
+  const { normalItems, bundleItems, serviceTaxAppliedItems } = getDifferentItems(items, countryCode);
   const productItems = getLineItems(normalItems);
   // Track number of line item
   let indexNum = productItems?.length > 0 ? productItems?.length : 0;
@@ -171,10 +141,46 @@ const getBundleChildrenLineItems = ({ taxProperties, countryCode, indexNum, incl
   return { childrenLineItems: lineItems, index: indexCurrent };
 };
 
+const getDifferentItems = (items, countryCode) => {
+  const normalItems = [];
+  const bundleItems = [];
+  const serviceTaxAppliedItems = [];
+
+  // Get normal items and bundle items
+  items?.forEach((item) => {
+    if (item?.tax_properties?.length > 0) {
+      const taxProperties = item.tax_properties;
+      const productType = taxProperties?.find((property) => property.code === PRODUCT_TYPE)?.value;
+      const isBundle = taxProperties?.find(
+        (property) => property.code === CALCULATE_TAX_ON_KIT_DETAIL && property.value === 'true',
+      )?.value;
+      const serviceTaxApplied = taxProperties?.find(
+        (property) => property.code?.includes(SERVICE_TAX_APPLIED) && property.value === 'true',
+      );
+      if (productType === BASIC && !isBundle) {
+        normalItems.push(item);
+      }
+      if (productType === BUNDLE && isBundle) {
+        bundleItems.push(item);
+      }
+      // TODO: handle serviceTaxApplied items
+      const isEU = isSame(countryCode, COUNTRY_CODE.EU);
+      if (isEU && serviceTaxApplied) {
+        serviceTaxAppliedItems.push(item);
+      }
+    } else {
+      normalItems.push(item);
+    }
+  });
+
+  return { normalItems, bundleItems, serviceTaxAppliedItems };
+};
+
 module.exports = {
   getLineItems,
   getAddressForAvalara,
   getAvalaraCreateTransactionRequestBody,
   getShippingCostLineItem,
   getBundleChildrenLineItems,
+  getDifferentItems,
 };

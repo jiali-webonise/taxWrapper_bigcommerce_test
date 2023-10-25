@@ -8,7 +8,6 @@ const instance = axios.create({
 
 const createCardMetaData = async ({ url, body, storeHash }) => {
   const token = getAccessToken(storeHash);
-  console.log('access token', token, storeHash);
   try {
     const res = await instance.post(url, body, {
       headers: {

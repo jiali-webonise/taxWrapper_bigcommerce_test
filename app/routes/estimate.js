@@ -205,12 +205,12 @@ const { createCardMetaData, getCartMetaData } = require('../services/bigcommerce
  */
 
 router.post('/', async (req, res, next) => {
+  let countryCode;
   try {
     const quoteId = req.body.id;
     const storeHashValue = req.headers['x-bc-store-hash'];
-    const countryCode = getCountryCode(storeHashValue);
+    countryCode = getCountryCode(storeHashValue);
     console.log('storeHashValue', storeHashValue);
-    console.log('countryCode', countryCode);
 
     const isFlatTaxRate = checkIsFlatTaxRate(countryCode);
     const isExempted = checkIsExempted(req.body);
@@ -233,7 +233,6 @@ router.post('/', async (req, res, next) => {
         });
         metaDataId = res?.data?.data?.id;
       }
-      console.log('metaDataId', metaDataId);
     } catch (error) {
       console.log(error);
     }
@@ -262,6 +261,7 @@ router.post('/', async (req, res, next) => {
         req.body.documents,
         quoteId,
         false,
+        countryCode,
         metaDataId,
       );
     }

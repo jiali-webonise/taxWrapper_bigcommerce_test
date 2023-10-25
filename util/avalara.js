@@ -45,26 +45,10 @@ const getAvalaraCreateTransactionRequestBody = (data, storeHash, commit, country
   const { normalItems, bundleItems, serviceTaxAppliedItems } = getDifferentItems(items, countryCode);
   const productItems = getLineItems(normalItems);
   // Track number of line item
-  let indexNum = productItems?.length > 0 ? productItems?.length : 0;
+  const indexNum = productItems?.length > 0 ? productItems?.length : 0;
 
   // Handle bundle items
-  let bundleLineItems = [];
-  if (bundleItems?.length > 0) {
-    bundleItems.forEach((item) => {
-      const taxProperties = item.tax_properties;
-      // check country and currency code are consistent
-      // TODO: handle unmatched errors
-      const matched = checkCountryOrCurrencyIsConsistent(taxProperties, countryCode, currencyCode);
-
-      const { childrenLineItems, index } = getBundleChildrenLineItems({
-        taxProperties: item.tax_properties,
-        countryCode,
-        indexNum,
-      });
-      indexNum = index;
-      bundleLineItems = [...bundleLineItems, ...childrenLineItems];
-    });
-  }
+  const { bundleLineItems, indexOfLine } = getChildrenFromBundle(bundleItems, countryCode, currencyCode, indexNum);
 
   const companyCode = getCompanyCode(storeHash);
   // TODO: For serviceTaxAppliedItems, need to change address
@@ -72,7 +56,7 @@ const getAvalaraCreateTransactionRequestBody = (data, storeHash, commit, country
   const shipToAddress = getAddressForAvalara(data.documents['0'].destination_address);
   const pointOfOriginAddress = getAddressForAvalara(data.documents['0'].origin_address);
   const docType = commit ? AVALARA_DOCUMENT_TYPE.SALES_INVOICE : AVALARA_DOCUMENT_TYPE.SALES_ORDER;
-  const shippingLineItem = getShippingCostLineItem(data.documents['0'].shipping, indexNum);
+  const shippingLineItem = getShippingCostLineItem(data.documents['0'].shipping, indexOfLine);
   const lineItems = [...productItems, ...bundleLineItems, shippingLineItem];
 
   const customerCode = data.customer.customer_id;
@@ -176,6 +160,30 @@ const getDifferentItems = (items, countryCode) => {
   return { normalItems, bundleItems, serviceTaxAppliedItems };
 };
 
+const getChildrenFromBundle = (bundleItems, countryCode, currencyCode, indexNum) => {
+  let bundleLineItems = [];
+  let indexCount = indexNum;
+
+  if (bundleItems?.length > 0) {
+    bundleItems.forEach((item) => {
+      const taxProperties = item.tax_properties;
+      // check country and currency code are consistent
+      // TODO: handle unmatched errors
+      const matched = checkCountryOrCurrencyIsConsistent(taxProperties, countryCode, currencyCode);
+
+      const { childrenLineItems, index } = getBundleChildrenLineItems({
+        taxProperties: item.tax_properties,
+        countryCode,
+        indexNum: indexCount,
+      });
+      indexCount = index;
+      bundleLineItems = [...bundleLineItems, ...childrenLineItems];
+    });
+  }
+
+  return { bundleLineItems, indexOfLine: indexCount };
+};
+
 module.exports = {
   getLineItems,
   getAddressForAvalara,
@@ -183,4 +191,5 @@ module.exports = {
   getShippingCostLineItem,
   getBundleChildrenLineItems,
   getDifferentItems,
+  getChildrenFromBundle,
 };

@@ -1,7 +1,7 @@
 const express = require('express');
 
 const router = express.Router();
-const { getCountryCode, checkIsFlatTaxRate, checkIsExempted } = require('../../util/util');
+const { getCountryCode, checkIsFlatTaxRate, checkIsExempted, getMetaDataFormat } = require('../../util/util');
 const {
   getTransformedResponseByFlatTaxRate,
   getTransformedResponseFromAvalara,
@@ -9,6 +9,7 @@ const {
 const { exampleEstimateTaxResponse } = require('../../util/example');
 const { TEST_CONNECTION_CODE } = require('../../config/constants.js');
 const { INTERNAL_SERVER_ERROR, OK } = require('../../config/api-config');
+const { createCardMetaData, getCartMetaData } = require('../services/bigcommerce-service');
 
 /**
  * @swagger
@@ -214,6 +215,28 @@ router.post('/', async (req, res, next) => {
     const isFlatTaxRate = checkIsFlatTaxRate(countryCode);
     const isExempted = checkIsExempted(req.body);
     let expectedResponse;
+    let metaDataId;
+    try {
+      //check if metadata with same key exists
+      const cartMetaData = await getCartMetaData({
+        url: String(`${storeHashValue}/v3/carts/${quoteId}/metafields`),
+        storeHash: storeHashValue,
+      });
+      metaDataId = cartMetaData?.data?.data?.filter((item) => item?.key === 'taxData')[0]?.id;
+      if (!metaDataId) {
+        //Create field if meta data does not exists
+        const createMetaField = getMetaDataFormat('data');
+        const res = await createCardMetaData({
+          url: String(`${storeHashValue}/v3/carts/${quoteId}/metafields`),
+          body: createMetaField,
+          storeHash: storeHashValue,
+        });
+        metaDataId = res?.data?.data?.id;
+      }
+      console.log('metaDataId', metaDataId);
+    } catch (error) {
+      console.log(error);
+    }
     // When BC test connection
     if (quoteId === 'quote-id') {
       expectedResponse = getTransformedResponseByFlatTaxRate(
@@ -223,7 +246,14 @@ router.post('/', async (req, res, next) => {
         isExempted,
       );
     } else if (isFlatTaxRate) {
-      expectedResponse = getTransformedResponseByFlatTaxRate(req.body.documents, quoteId, countryCode, isExempted);
+      expectedResponse = await getTransformedResponseByFlatTaxRate(
+        req.body.documents,
+        quoteId,
+        countryCode,
+        isExempted,
+        storeHashValue,
+        metaDataId,
+      );
     } else {
       // Transform avalara response to BC response
       expectedResponse = await getTransformedResponseFromAvalara(
@@ -232,6 +262,7 @@ router.post('/', async (req, res, next) => {
         req.body.documents,
         quoteId,
         false,
+        metaDataId,
       );
     }
     if (!expectedResponse) {

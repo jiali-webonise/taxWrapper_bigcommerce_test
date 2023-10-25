@@ -13,6 +13,16 @@ const {
   WEBONISELAB_STORE_HASH,
 } = process.env;
 
+const {
+  US_BIGCOMMERCE_ACCESS_TOKEN,
+  CA_BIGCOMMERCE_ACCESS_TOKEN,
+  AU_BIGCOMMERCE_ACCESS_TOKEN,
+  NZ_BIGCOMMERCE_ACCESS_TOKEN,
+  JP_BIGCOMMERCE_ACCESS_TOKEN,
+  IN_BIGCOMMERCE_ACCESS_TOKEN,
+  EU_BIGCOMMERCE_ACCESS_TOKEN,
+  WEBONISELAB_ACCESS_TOKEN,
+} = process.env;
 /**
  * Identify country code by storeHash
  *
@@ -37,7 +47,7 @@ const getCountryCode = (storeHash) => {
       return 'EU';
     case WEBONISELAB_STORE_HASH:
       // this is for testing in Webonise sandbox
-      return 'US';
+      return 'JP';
     // no default
     default:
       return null;
@@ -107,6 +117,41 @@ const checkIsExempted = (data) => {
   return false;
 };
 
+const getAccessToken = (storeHash) => {
+  if (!storeHash) return null;
+  switch (storeHash) {
+    case US_BIGCOMMERCE_STORE_HASH:
+      return US_BIGCOMMERCE_ACCESS_TOKEN;
+    case CA_BIGCOMMERCE_STORE_HASH:
+      return CA_BIGCOMMERCE_ACCESS_TOKEN;
+    case AU_BIGCOMMERCE_STORE_HASH:
+      return AU_BIGCOMMERCE_ACCESS_TOKEN;
+    case NZ_BIGCOMMERCE_STORE_HASH:
+      return NZ_BIGCOMMERCE_ACCESS_TOKEN;
+    case JP_BIGCOMMERCE_STORE_HASH:
+      return JP_BIGCOMMERCE_ACCESS_TOKEN;
+    case IN_BIGCOMMERCE_STORE_HASH:
+      return IN_BIGCOMMERCE_ACCESS_TOKEN;
+    case EU_BIGCOMMERCE_STORE_HASH:
+      return EU_BIGCOMMERCE_ACCESS_TOKEN;
+    case WEBONISELAB_STORE_HASH:
+      return WEBONISELAB_ACCESS_TOKEN;
+    default:
+      return WEBONISELAB_ACCESS_TOKEN;
+  }
+};
+
+const getMetaDataFormat = (data) => {
+  const reqObj = {
+    permission_set: 'write_and_sf_access',
+    namespace: 'Tax Calculation',
+    key: 'taxData',
+    value: JSON.stringify(data || ''),
+    description: 'Tax calculated for cart',
+  };
+  return reqObj;
+};
+
 module.exports = {
   getCountryCode,
   roundOffValue,
@@ -115,4 +160,6 @@ module.exports = {
   getFlatTaxRate,
   getCompanyCode,
   checkIsExempted,
+  getAccessToken,
+  getMetaDataFormat,
 };

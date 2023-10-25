@@ -6,6 +6,7 @@ const {
   roundOffValue,
   checkIsFlatTaxRate,
   getFlatTaxRate,
+  isSame,
 } = require('../util/util');
 const { InternalError } = require('../app/services/error-service');
 
@@ -91,6 +92,16 @@ describe('utils method test', () => {
       assert.throws(() => getFlatTaxRate(null), InternalError);
       const result2 = getFlatTaxRate('JP');
       assert.equal(JSON.stringify(result2), JSON.stringify({ flatTaxRate: 0.1, shippingTaxRate: 0.1 }));
+    });
+  });
+
+  describe('testing isSame', () => {
+    it('should return isSame value', () => {
+      const result1 = isSame('US', 'US');
+      const result2 = isSame('US', 'CA');
+
+      assert.equal(result1, true);
+      assert.equal(result2, false);
     });
   });
 });

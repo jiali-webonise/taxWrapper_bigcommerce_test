@@ -130,7 +130,6 @@ router.post('/', async (req, res, next) => {
         });
         metaDataId = res?.data?.data?.id;
       }
-      console.log('metaDataId', metaDataId);
     } catch (error) {
       console.log(error);
     }

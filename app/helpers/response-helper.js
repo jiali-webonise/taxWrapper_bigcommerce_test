@@ -60,6 +60,7 @@ const getTransformedResponseFromAvalara = async (data, storeHash, documents, quo
                 countryCode,
                 indexNum: 0,
                 includeParentPrice: true,
+                item,
               });
               // merge bundle children items into one
               transformedItem = getParentTaxFromAvalaraResponse(
@@ -203,8 +204,8 @@ const getParentTaxFromAvalaraResponse = (item, childrenLineItems, avalaraRespons
     if (avalaraItem) {
       details = avalaraItem?.details;
     }
-    parentPrice = Number(child?.parentPrice);
-    taxAmount += avalaraItem.tax;
+    parentPrice = Number(child?.parentPrice) * avalaraItem.quantity;
+    taxAmount += avalaraItem.tax * avalaraItem.quantity;
   });
   calculatedPrice.total_tax = taxAmount;
   if (isUS || isCA) {

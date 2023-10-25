@@ -85,7 +85,7 @@ const getAvalaraCreateTransactionRequestBody = (data, storeHash, commit, country
   return finalRequestBody;
 };
 
-const getBundleChildrenLineItems = ({ taxProperties, countryCode, indexNum, includeParentPrice }) => {
+const getBundleChildrenLineItems = ({ taxProperties, countryCode, indexNum, includeParentPrice, item }) => {
   if (taxProperties?.length === 0) return;
   let price = 0;
   const isEU = isSame(countryCode, COUNTRY_CODE.EU);
@@ -115,7 +115,7 @@ const getBundleChildrenLineItems = ({ taxProperties, countryCode, indexNum, incl
         index: indexCurrent,
         percentage: child.value,
         price: price,
-        quantity: 1, // Need further confirmation
+        quantity: item?.quantity,
         includeParentPrice: includeParentPrice,
       });
       indexCurrent = index;
@@ -175,6 +175,7 @@ const getChildrenFromBundle = (bundleItems, countryCode, currencyCode, indexNum)
         taxProperties: item.tax_properties,
         countryCode,
         indexNum: indexCount,
+        item,
       });
       indexCount = index;
       bundleLineItems = [...bundleLineItems, ...childrenLineItems];

@@ -112,9 +112,37 @@ router.post('/', async (req, res, next) => {
     const isExempted = checkIsExempted(req.body);
     const isFlatTaxRate = checkIsFlatTaxRate(countryCode);
     let expectedResponse;
+    let metaDataId;
+    try {
+      //check if metadata with same key exists
+      const cartMetaData = await getCartMetaData({
+        url: String(`${storeHashValue}/v3/carts/${quoteId}/metafields`),
+        storeHash: storeHashValue,
+      });
+      metaDataId = cartMetaData?.data?.data?.filter((item) => item?.key === 'taxData')[0]?.id;
+      if (!metaDataId) {
+        //Create field if meta data does not exists
+        const createMetaField = getMetaDataFormat('data');
+        const res = await createCardMetaData({
+          url: String(`${storeHashValue}/v3/carts/${quoteId}/metafields`),
+          body: createMetaField,
+          storeHash: storeHashValue,
+        });
+        metaDataId = res?.data?.data?.id;
+      }
+    } catch (error) {
+      console.log(error);
+    }
     if (isFlatTaxRate) {
       const flatTaxRate = getFlatTaxRate(countryCode);
-      expectedResponse = getTransformedResponseByFlatTaxRate(req.body.documents, quoteId, flatTaxRate, isExempted);
+      expectedResponse = getTransformedResponseByFlatTaxRate(
+        req.body.documents,
+        quoteId,
+        flatTaxRate,
+        isExempted,
+        storeHashValue,
+        metaDataId,
+      );
     } else {
       // TODO: Change commit-final argument to true for production-provided false for testing
       //NOTE: If you test commit record the transactionId of the document
@@ -124,6 +152,7 @@ router.post('/', async (req, res, next) => {
         req.body.documents,
         quoteId,
         false,
+        metaDataId,
       );
     }
     console.log('expectedResponse', JSON.stringify(expectedResponse));

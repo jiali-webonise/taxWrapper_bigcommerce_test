@@ -2,7 +2,8 @@ const { TaxProviderResponseObject } = require('../models/TaxProviderResponseObje
 const { SalesTaxSummary } = require('../models/SalesTaxSummary');
 const { AVALARA_PATH, COUNTRY_CODE } = require('../../config/constants');
 const { getAmountExclusiveByTaxRate, getAmountInclusiveByTaxRate } = require('./tax-calculate-helper');
-const { roundOffValue, getFlatTaxRate, isSame } = require('../../util/util');
+const { updateCardMetaData } = require('../services/bigcommerce-service');
+const { roundOffValue, getFlatTaxRate, isSame, getMetaDataFormat } = require('../../util/util');
 const { getAvalaraCreateTransactionRequestBody, getBundleChildrenLineItems } = require('../../util/avalara');
 const { postAvalaraService } = require('../services/avalara-service');
 const { BUNDLE, BASIC, PRODUCT_TYPE, CALCULATE_TAX_ON_KIT_DETAIL } = require('../../util/tax-properties');
@@ -13,27 +14,117 @@ const { BUNDLE, BASIC, PRODUCT_TYPE, CALCULATE_TAX_ON_KIT_DETAIL } = require('..
  * @param   {Object}    documents      documents(cart data) received from BC
  * @param   {String}    quoteId        quoteId received from BC Tax Provider API
  */
-const getTransformedResponseByFlatTaxRate = (documents, quoteId, countryCode, isExempted) => {
+const getTransformedResponseByFlatTaxRate = async (
+  documents,
+  quoteId,
+  countryCode,
+  isExempted,
+  storeHash,
+  metaDataId,
+) => {
   const { flatTaxRate, shippingTaxRate } = getFlatTaxRate(countryCode);
+  const data = {};
   const transformedDocs = documents.map((document) => {
     const items = document.items;
+    let metaDataArr = {
+      items: [],
+      documents: document.items,
+    };
     const transformedItems = items.map((item) => {
       const transformedItem = getCalculatedResponseByTaxRate(item, flatTaxRate, isExempted);
+      metaDataArr?.items?.push(JSON.parse(JSON.stringify(transformedItem)?.split('TaxProviderResponseObject')));
       return transformedItem;
     });
     const shipping = getCalculatedResponseByTaxRate(document.shipping, shippingTaxRate, isExempted);
+    metaDataArr.shipping = JSON.parse(JSON.stringify(shipping)?.split('TaxProviderResponseObject'));
     // Modere doesn't have Handling fee but BC ask for this attribute
     const handling = getCalculatedResponseByTaxRate(document.handling, 0);
+    metaDataArr.handling = JSON.parse(JSON.stringify(handling)?.split('TaxProviderResponseObject'));
+    data[document.id] = metaDataArr;
     return { id: document.id, items: transformedItems, shipping: shipping, handling: handling };
   });
+  //create card metaData
+  const metaData = getMetaData(data, true);
+  const requestBodyForCartMetadata = getMetaDataFormat(metaData);
+  if (metaDataId) {
+    const res = await updateCardMetaData({
+      url: String(`${storeHash}/v3/carts/${quoteId}/metafields/${metaDataId}`),
+      body: requestBodyForCartMetadata,
+      storeHash,
+    });
+    console.log('res', res);
+  }
   return { documents: transformedDocs, id: quoteId };
 };
 
-const getTransformedResponseFromAvalara = async (data, storeHash, documents, quoteId, commit, countryCode) => {
-  const avalaraRequestBody = getAvalaraCreateTransactionRequestBody(data, storeHash, commit, countryCode);
+const getMetaData = (data, isFlatTaxMarket) => {
+  if (isFlatTaxMarket) {
+    const obj = Object.keys(data)?.map((itemkey) => {
+      const item = data[itemkey];
+      let itemsArr = item?.items?.map((line) => {
+        const lineItemData = {
+          id: line?.id,
+          taxableAmount: line?.price?.amount_exclusive,
+          taxCalculated: line?.price?.total_tax,
+        };
+        return lineItemData;
+      });
+      const handling = {
+        id: item?.handling?.id,
+        taxableAmount: item?.handling?.price?.amount_exclusive,
+        taxCalculated: item?.handling?.price?.total_tax,
+      };
+      const shipping = {
+        id: item?.shipping?.id,
+        taxableAmount: item?.shipping?.price?.amount_exclusive,
+        taxCalculated: item?.shipping?.price?.total_tax,
+      };
+      return {
+        id: itemkey,
+        data: [...itemsArr, handling, shipping],
+      };
+    });
+
+    return obj;
+  }
+  const items = data?.lines;
+  const lineItemArray = items?.map((item) => {
+    const obj = {
+      itemCode: item?.itemCode,
+      taxCode: item?.taxCode,
+      taxableAmount: item?.taxableAmount,
+      taxRate: item?.tax,
+      taxCalculated: item?.taxCalculated,
+    };
+    return obj;
+  });
+  return lineItemArray;
+};
+
+const getTransformedResponseFromAvalara = async (
+  data,
+  storeHash,
+  documents,
+  quoteId,
+  commit,
+  countryCode,
+  metaDataId,
+) => {
+  const avalaraRequestBody = getAvalaraCreateTransactionRequestBody(data, storeHash, commit);
   const avalaraResponse = await postAvalaraService({ url: AVALARA_PATH.CREATE_TRANSICATION, body: avalaraRequestBody });
   console.log('avalaraRequestBody', avalaraRequestBody);
   console.log('avalaraResponse', avalaraResponse);
+  //create card metaData
+  const dataFormat = getMetaData(avalaraResponse, false);
+  const requestBodyForCartMetadata = getMetaDataFormat(dataFormat);
+  if (metaDataId) {
+    const res = await updateCardMetaData({
+      url: String(`${storeHash}/v3/carts/${quoteId}/metafields/${metaDataId}`),
+      body: requestBodyForCartMetadata,
+      storeHash,
+    });
+    console.log('res', res);
+  }
   if (!avalaraResponse) {
     return avalaraResponse;
   }
@@ -244,5 +335,6 @@ module.exports = {
   getTransformedResponseFromAvalara,
   getCalculatedResponseByTaxRate,
   getTaxFromAvalaraResponse,
+  getMetaData,
   getParentTaxFromAvalaraResponse,
 };

@@ -1,13 +1,7 @@
 const { SalesTaxSummary } = require('../app/models/SalesTaxSummary');
 const { TaxProviderResponseObject } = require('../app/models/TaxProviderResponseObject');
 const { AVALARA_DOCUMENT_TYPE, COUNTRY_CODE } = require('../config/constants');
-const {
-  getCompanyCode,
-  getCurrencyAndCountryByTaxProperty,
-  checkCountryOrCurrency,
-  checkCountryOrCurrencyIsConsistent,
-  getChildProduct,
-} = require('../util/util');
+const { getCompanyCode, checkCountryOrCurrencyIsConsistent, getChildProduct, isSame } = require('../util/util');
 const { PRODUCT_TYPE, BASIC, BUNDLE, SERVICE_TAX_APPLIED, CALCULATE_TAX_ON_KIT_DETAIL } = require('./tax-properties');
 
 const getLineItems = (items) => {
@@ -140,17 +134,16 @@ const getAvalaraCreateTransactionRequestBody = (data, storeHash, commit, country
 const getBundleChildrenLineItems = ({ taxProperties, countryCode, indexNum, includeParentPrice }) => {
   if (taxProperties?.length === 0) return;
   let price = 0;
-
-  if (countryCode?.localeCompare(COUNTRY_CODE.EU) === 0) {
+  const isEU = isSame(countryCode, COUNTRY_CODE.EU);
+  const isUS = isSame(countryCode, COUNTRY_CODE.US);
+  const isCA = isSame(countryCode, COUNTRY_CODE.CA);
+  if (isEU) {
     price = taxProperties?.find(
       (property) => String(property.code)?.startsWith('price') && String(property.code)?.includes(countryCode),
     )?.value;
   }
 
-  if (
-    countryCode?.localeCompare(COUNTRY_CODE.US, 'en', { sensitivity: 'base' }) === 0 ||
-    countryCode?.localeCompare(COUNTRY_CODE.CA, 'en', { sensitivity: 'base' }) === 0
-  ) {
+  if (isUS || isCA) {
     price = taxProperties?.find(
       (property) =>
         String(property.code)?.startsWith('taxableprice') && String(property.code)?.includes(countryCode.toLowerCase()),
@@ -178,65 +171,10 @@ const getBundleChildrenLineItems = ({ taxProperties, countryCode, indexNum, incl
   return { childrenLineItems: lineItems, index: indexCurrent };
 };
 
-const getParentTaxFromAvalaraResponse = (item, childrenLineItems, avalaraResponseLines, countryCode) => {
-  // console.log('childrenLineItems', childrenLineItems);
-  // console.log('avalaraResponseLines', avalaraResponseLines);
-
-  const calculatedPrice = { tax_rate: 0, amount_exclusive: 0, total_tax: 0, amount_inclusive: 0 };
-  let taxClassCode = '';
-  let taxAmount = 0;
-  let details;
-  let parentPrice;
-  const isUSOrCA =
-    countryCode?.localeCompare(COUNTRY_CODE.US, 'en', { sensitivity: 'base' }) === 0 ||
-    countryCode?.localeCompare(COUNTRY_CODE.CA, 'en', { sensitivity: 'base' }) === 0;
-  const isEU = countryCode?.localeCompare(COUNTRY_CODE.EU) === 0;
-  childrenLineItems?.forEach((child) => {
-    const avalaraItem = avalaraResponseLines.find((el) => el.itemCode === child.itemCode);
-    if (avalaraItem) {
-      details = avalaraItem?.details;
-    }
-    parentPrice = Number(child?.parentPrice);
-    taxAmount += avalaraItem.tax;
-  });
-  calculatedPrice.total_tax = taxAmount;
-  if (isUSOrCA) {
-    calculatedPrice.amount_exclusive = parentPrice;
-    calculatedPrice.amount_inclusive = parentPrice + taxAmount;
-  } else if (isEU) {
-    calculatedPrice.amount_inclusive = parentPrice;
-    calculatedPrice.amount_exclusive = parentPrice - taxAmount;
-  }
-
-  details?.forEach((detail) => {
-    calculatedPrice.tax_rate += detail.rate;
-    taxClassCode = detail.country;
-  });
-
-  // Can only have one salesTaxSummary and the tax rate is the total tax rate
-  const salesTaxSummary = new SalesTaxSummary({
-    name: 'Tax',
-    rate: calculatedPrice.tax_rate,
-    amount: taxAmount,
-    taxClass: { ...item.tax_class, code: taxClassCode },
-    id: 'Tax',
-  });
-
-  const result = new TaxProviderResponseObject({
-    id: item.id,
-    price: calculatedPrice,
-    type: item.type,
-    salesTaxSummary: [salesTaxSummary],
-  });
-
-  return result;
-};
-
 module.exports = {
   getLineItems,
   getAddressForAvalara,
   getAvalaraCreateTransactionRequestBody,
   getShippingCostLineItem,
   getBundleChildrenLineItems,
-  getParentTaxFromAvalaraResponse,
 };

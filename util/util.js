@@ -124,6 +124,19 @@ const getCurrencyAndCountryByTaxProperty = (taxProperty) => {
 };
 
 /**
+ *
+ * @param {string} item1
+ * @param {string} item2
+ * @returns
+ */
+const isSame = (item1, item2) => {
+  if (item1 && typeof item1 === 'string') {
+    return item1?.localeCompare(item2, 'en', { sensitivity: 'base' }) === 0;
+  }
+  return false;
+};
+
+/**
  * check if country and currency are consistent
  *
  * @param {Array} taxProperties
@@ -141,11 +154,10 @@ const checkCountryOrCurrencyIsConsistent = (taxProperties, countryCode, currency
 
   return filteredTaxProperties.every((property) => {
     const { country, currency } = getCurrencyAndCountryByTaxProperty(property?.code);
+    const isCountryValid = isSame(country, countryCode);
+    const isCurrencyValid = isSame(currency, currencyCode);
 
-    if (
-      country?.localeCompare(COUNTRY_CODE[countryCode], 'en', { sensitivity: 'base' }) === 0 ||
-      currency?.localeCompare(currencyCode, 'en', { sensitivity: 'base' }) === 0
-    ) {
+    if (isCountryValid || isCurrencyValid) {
       return true;
     }
     console.error(
@@ -199,4 +211,5 @@ module.exports = {
   getCurrencyAndCountryByTaxProperty,
   checkCountryOrCurrencyIsConsistent,
   getChildProduct,
+  isSame,
 };

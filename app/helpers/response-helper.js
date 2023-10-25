@@ -2,7 +2,7 @@ const { TaxProviderResponseObject } = require('../models/TaxProviderResponseObje
 const { SalesTaxSummary } = require('../models/SalesTaxSummary');
 const { AVALARA_PATH, COUNTRY_CODE } = require('../../config/constants');
 const { getAmountExclusiveByTaxRate, getAmountInclusiveByTaxRate } = require('./tax-calculate-helper');
-const { roundOffValue, getFlatTaxRate } = require('../../util/util');
+const { roundOffValue, getFlatTaxRate, isSame } = require('../../util/util');
 const { getAvalaraCreateTransactionRequestBody, getBundleChildrenLineItems } = require('../../util/avalara');
 const { postAvalaraService } = require('../services/avalara-service');
 const { BUNDLE, BASIC, PRODUCT_TYPE, CALCULATE_TAX_ON_KIT_DETAIL } = require('../../util/tax-properties');
@@ -195,10 +195,9 @@ const getParentTaxFromAvalaraResponse = (item, childrenLineItems, avalaraRespons
   let taxAmount = 0;
   let details;
   let parentPrice;
-  const isUSOrCA =
-    countryCode?.localeCompare(COUNTRY_CODE.US, 'en', { sensitivity: 'base' }) === 0 ||
-    countryCode?.localeCompare(COUNTRY_CODE.CA, 'en', { sensitivity: 'base' }) === 0;
-  const isEU = countryCode?.localeCompare(COUNTRY_CODE.EU) === 0;
+  const isUS = isSame(countryCode, COUNTRY_CODE.US);
+  const isCA = isSame(countryCode, COUNTRY_CODE.CA);
+  const isEU = isSame(countryCode, COUNTRY_CODE.EU);
   childrenLineItems?.forEach((child) => {
     const avalaraItem = avalaraResponseLines.find((el) => el.itemCode === child.itemCode);
     if (avalaraItem) {
@@ -208,7 +207,7 @@ const getParentTaxFromAvalaraResponse = (item, childrenLineItems, avalaraRespons
     taxAmount += avalaraItem.tax;
   });
   calculatedPrice.total_tax = taxAmount;
-  if (isUSOrCA) {
+  if (isUS || isCA) {
     calculatedPrice.amount_exclusive = parentPrice;
     calculatedPrice.amount_inclusive = parentPrice + taxAmount;
   } else if (isEU) {
